@@ -1,0 +1,67 @@
+{
+  "name": "@openjobspec/schemas",
+  "version": "1.0.0-rc.1",
+  "description": "JSON Schema definitions for the Open Job Spec (OJS) v1.0.0-rc.1. Includes job envelope, retry policy, unique policy, error, event, workflow, cron, and HTTP binding schemas.",
+  "keywords": [
+    "openjobspec",
+    "ojs",
+    "job-queue",
+    "background-jobs",
+    "json-schema",
+    "schema",
+    "validation"
+  ],
+  "homepage": "https://openjobspec.org",
+  "bugs": {
+    "url": "https://github.com/openjobspec/ojs-json-schema/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/openjobspec/ojs-json-schema.git"
+  },
+  "license": "Apache-2.0",
+  "author": "Open Job Spec Contributors",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./schemas/v1/job.schema.json",
+      "require": "./schemas/v1/job.schema.json"
+    },
+    "./job": "./schemas/v1/job.schema.json",
+    "./job-options": "./schemas/v1/job-options.schema.json",
+    "./retry-policy": "./schemas/v1/retry-policy.schema.json",
+    "./unique-policy": "./schemas/v1/unique-policy.schema.json",
+    "./error": "./schemas/v1/error.schema.json",
+    "./event": "./schemas/v1/event.schema.json",
+    "./workflow": "./schemas/v1/workflow.schema.json",
+    "./cron": "./schemas/v1/cron.schema.json",
+    "./queue-stats": "./schemas/v1/queue-stats.schema.json",
+    "./worker-info": "./schemas/v1/worker-info.schema.json",
+    "./manifest": "./schemas/v1/manifest.schema.json",
+    "./http/enqueue-request": "./schemas/v1/http/enqueue-request.schema.json",
+    "./http/enqueue-response": "./schemas/v1/http/enqueue-response.schema.json",
+    "./http/batch-enqueue-request": "./schemas/v1/http/batch-enqueue-request.schema.json",
+    "./http/batch-enqueue-response": "./schemas/v1/http/batch-enqueue-response.schema.json",
+    "./http/fetch-request": "./schemas/v1/http/fetch-request.schema.json",
+    "./http/fetch-response": "./schemas/v1/http/fetch-response.schema.json",
+    "./http/ack-request": "./schemas/v1/http/ack-request.schema.json",
+    "./http/nack-request": "./schemas/v1/http/nack-request.schema.json",
+    "./http/heartbeat-request": "./schemas/v1/http/heartbeat-request.schema.json",
+    "./http/heartbeat-response": "./schemas/v1/http/heartbeat-response.schema.json",
+    "./schemas/*": "./schemas/*"
+  },
+  "files": [
+    "schemas/",
+    "tests/",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node --test tests/validate.test.js",
+    "validate": "ajv validate -s schemas/v1/job.schema.json -d 'tests/valid/*.json' --spec=draft2020"
+  },
+  "devDependencies": {
+    "ajv": "^8.17.0",
+    "ajv-formats": "^3.0.0"
+  }
+}
