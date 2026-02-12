@@ -1,0 +1,10 @@
+{
+  "_description": "Job with unknown attributes that MUST be preserved (forward compatibility). The 'x_custom_field' and 'x_backend_hint' are extension attributes.",
+  "specversion": "1.0.0-rc.1",
+  "id": "019461a8-d6e7-78f9-0a1b-7f8091021324",
+  "type": "webhook.deliver",
+  "queue": "webhooks",
+  "args": ["https://hooks.example.com/callback", {"event": "order.created"}],
+  "x_custom_field": "custom_value",
+  "x_backend_hint": {"partition": 3, "shard": "us-east-1"}
+}

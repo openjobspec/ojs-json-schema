@@ -1,0 +1,12 @@
+{
+  "_reason": "INVALID: retry 'backoff_coefficient' MUST be >= 1.0. A value of 0.5 is not allowed.",
+  "specversion": "1.0.0-rc.1",
+  "id": "019461a8-1a2b-7c3d-8e4f-5a6b7c8d9e0f",
+  "type": "email.send",
+  "queue": "default",
+  "args": ["user@example.com", "welcome"],
+  "retry": {
+    "max_attempts": 5,
+    "backoff_coefficient": 0.5
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "_description": "Full job envelope with all optional attributes",
+  "specversion": "1.0.0-rc.1",
+  "id": "019461a8-2b3c-7d4e-9f50-6a7b8c9d0e1f",
+  "type": "report.generate",
+  "queue": "reports",
+  "args": [42, "quarterly", {"include_charts": true}],
+  "meta": {
+    "trace_id": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "span_id": "00f067aa0ba902b7",
+    "user_id": "usr_12345",
+    "tenant_id": "tenant_acme",
+    "locale": "en-US",
+    "correlation_id": "corr_report_q4_2026",
+    "tags": ["quarterly", "finance", "high-priority"]
+  },
+  "priority": 10,
+  "timeout": 300,
+  "scheduled_at": "2026-03-01T09:00:00Z",
+  "expires_at": "2026-03-01T18:00:00Z",
+  "retry": {
+    "max_attempts": 5,
+    "initial_interval": "PT1S",
+    "backoff_coefficient": 2.0,
+    "max_interval": "PT5M",
+    "jitter": true,
+    "non_retryable_errors": ["ValidationError", "AuthenticationError"]
+  },
+  "unique": {
+    "keys": ["type", "args"],
+    "period": "PT1H",
+    "on_conflict": "reject"
+  },
+  "schema": "urn:ojs:schema:report.generate:v2"
+}

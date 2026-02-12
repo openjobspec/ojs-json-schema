@@ -1,0 +1,32 @@
+{
+  "_description": "Job that exhausted all retry attempts (dead letter queue)",
+  "specversion": "1.0.0-rc.1",
+  "id": "019461a8-5e6f-7071-c283-9d0e1f2a3b4c",
+  "type": "payment.process",
+  "queue": "payments",
+  "args": [{"order_id": "ord_98765", "amount": 49.99, "currency": "USD"}],
+  "meta": {
+    "user_id": "usr_11111",
+    "correlation_id": "checkout_sess_xyz"
+  },
+  "priority": 10,
+  "timeout": 60,
+  "retry": {
+    "max_attempts": 3
+  },
+  "state": "discarded",
+  "attempt": 3,
+  "created_at": "2026-02-12T08:00:00.000Z",
+  "enqueued_at": "2026-02-12T08:00:00.000Z",
+  "started_at": "2026-02-12T08:05:12.000Z",
+  "completed_at": "2026-02-12T08:05:13.500Z",
+  "error": {
+    "type": "PaymentGatewayError",
+    "message": "Payment gateway returned HTTP 503: Service Unavailable",
+    "backtrace": [
+      "at PaymentClient.charge (payment_client.py:89)",
+      "at process_payment (handlers/payment.py:23)",
+      "at Worker.run_handler (worker.py:156)"
+    ]
+  }
+}

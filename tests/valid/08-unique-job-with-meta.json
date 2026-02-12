@@ -1,0 +1,20 @@
+{
+  "_description": "Job with unique policy using meta keys for deduplication",
+  "specversion": "1.0.0-rc.1",
+  "id": "019461a8-8192-73a4-b5c6-2a3b4c5d6e7f",
+  "type": "billing.invoice.generate",
+  "queue": "billing",
+  "args": [{"month": "2026-02", "format": "pdf"}],
+  "meta": {
+    "tenant_id": "tenant_acme",
+    "user_id": "usr_admin"
+  },
+  "unique": {
+    "keys": ["type", "args", "meta"],
+    "meta_keys": ["tenant_id"],
+    "args_keys": ["month"],
+    "period": "P1D",
+    "states": ["available", "active", "scheduled"],
+    "on_conflict": "ignore"
+  }
+}

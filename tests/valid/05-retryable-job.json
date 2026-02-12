@@ -1,0 +1,32 @@
+{
+  "_description": "Job that failed on second attempt and is waiting to retry",
+  "specversion": "1.0.0-rc.1",
+  "id": "019461a8-4d5e-7f60-b172-8c9d0e1f2a3b",
+  "type": "data.sync",
+  "queue": "default",
+  "args": ["source_db", "target_db", {"table": "users"}],
+  "meta": {},
+  "priority": 0,
+  "timeout": 600,
+  "retry": {
+    "max_attempts": 5,
+    "initial_interval": "PT1S",
+    "backoff_coefficient": 2.0,
+    "max_interval": "PT5M",
+    "jitter": true
+  },
+  "state": "retryable",
+  "attempt": 2,
+  "created_at": "2026-02-12T10:00:00.000Z",
+  "enqueued_at": "2026-02-12T10:00:00.000Z",
+  "started_at": "2026-02-12T10:01:00.000Z",
+  "error": {
+    "type": "ConnectionError",
+    "message": "Connection to target_db timed out after 60s",
+    "backtrace": [
+      "at DbClient.connect (db_client.go:142)",
+      "at SyncHandler.Execute (handlers/data_sync.go:38)",
+      "at Worker.executeJob (worker.go:201)"
+    ]
+  }
+}

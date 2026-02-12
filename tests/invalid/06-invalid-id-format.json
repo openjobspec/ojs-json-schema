@@ -1,0 +1,8 @@
+{
+  "_reason": "INVALID: 'id' MUST be UUIDv7 format (version digit must be 7, variant must be 8/9/a/b). This UUID has version 4 instead of 7.",
+  "specversion": "1.0.0-rc.1",
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "type": "email.send",
+  "queue": "default",
+  "args": ["user@example.com", "welcome"]
+}

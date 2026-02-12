@@ -1,0 +1,13 @@
+{
+  "_description": "Job scheduled for future execution with low priority",
+  "specversion": "1.0.0-rc.1",
+  "id": "019461a8-6f70-7182-d394-0e1f2a3b4c5d",
+  "type": "notification.send_digest",
+  "queue": "notifications",
+  "args": ["usr_22222", "weekly"],
+  "meta": {
+    "locale": "fr-FR"
+  },
+  "priority": -10,
+  "scheduled_at": "2026-02-17T08:00:00+01:00"
+}

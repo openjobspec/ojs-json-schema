@@ -1,0 +1,18 @@
+{
+  "_description": "Job that was cancelled during execution",
+  "specversion": "1.0.0-rc.1",
+  "id": "019461a8-c5d6-77e8-f90a-6e7f80910213",
+  "type": "video.transcode",
+  "queue": "media",
+  "args": ["video_12345", "1080p", {"format": "mp4"}],
+  "meta": {
+    "user_id": "usr_creator"
+  },
+  "priority": 0,
+  "timeout": 7200,
+  "state": "cancelled",
+  "attempt": 1,
+  "created_at": "2026-02-12T11:00:00.000Z",
+  "enqueued_at": "2026-02-12T11:00:00.000Z",
+  "started_at": "2026-02-12T11:00:05.000Z"
+}

@@ -1,0 +1,8 @@
+{
+  "_reason": "INVALID: 'type' MUST use dot-separated lowercase segments starting with a letter. Uppercase letters are not allowed.",
+  "specversion": "1.0.0-rc.1",
+  "id": "019461a8-1a2b-7c3d-8e4f-5a6b7c8d9e0f",
+  "type": "Email.Send",
+  "queue": "default",
+  "args": ["user@example.com", "welcome"]
+}

@@ -1,0 +1,34 @@
+{
+  "_description": "Job with deeply nested args including arrays, objects, and mixed types",
+  "specversion": "1.0.0-rc.1",
+  "id": "019461a8-a3b4-75c6-d7e8-4c5d6e7f8091",
+  "type": "data.etl.transform",
+  "queue": "etl",
+  "args": [
+    "source_table",
+    {
+      "transformations": [
+        {"column": "email", "action": "lowercase"},
+        {"column": "name", "action": "trim"},
+        {"column": "age", "action": "cast", "to": "integer"}
+      ],
+      "filters": {
+        "active": true,
+        "created_after": "2025-01-01"
+      },
+      "output": {
+        "table": "cleaned_users",
+        "mode": "upsert",
+        "conflict_keys": ["email"]
+      }
+    },
+    true,
+    null,
+    42
+  ],
+  "meta": {
+    "tags": ["etl", "nightly", "users"]
+  },
+  "priority": -10,
+  "timeout": 3600
+}
