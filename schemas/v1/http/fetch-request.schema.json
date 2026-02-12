@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openjobspec.org/schemas/v1/http/fetch-request.json",
+  "title": "OJS HTTP Fetch Request",
+  "description": "Request body for POST /ojs/v1/workers/fetch. Claims one or more jobs from the specified queues for processing by a worker.",
+  "type": "object",
+  "required": ["queues"],
+  "properties": {
+    "queues": {
+      "title": "Queues",
+      "description": "Ordered list of queues to fetch from. Queue priority is left-to-right: the first queue is checked first.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9][a-z0-9\\-\\.]*$"
+      },
+      "minItems": 1,
+      "examples": [
+        ["email", "default"],
+        ["default"]
+      ]
+    },
+    "count": {
+      "title": "Count",
+      "description": "Maximum number of jobs to fetch in this request. Default is 1.",
+      "type": "integer",
+      "minimum": 1,
+      "default": 1,
+      "examples": [1, 5, 10]
+    },
+    "worker_id": {
+      "title": "Worker ID",
+      "description": "Unique identifier for the worker process requesting jobs.",
+      "type": "string",
+      "minLength": 1,
+      "examples": ["worker_019414d4-aaaa-7000-c000-111111111111"]
+    },
+    "visibility_timeout_ms": {
+      "title": "Visibility Timeout (ms)",
+      "description": "How long the job is reserved before being reclaimed if the worker does not ACK or FAIL it. In milliseconds. Default is 30000.",
+      "type": "integer",
+      "minimum": 1000,
+      "default": 30000,
+      "examples": [10000, 30000, 60000]
+    }
+  },
+  "additionalProperties": false,
+  "examples": [
+    {
+      "queues": ["email", "default"],
+      "count": 5,
+      "worker_id": "worker_019414d4-aaaa-7000-c000-111111111111",
+      "visibility_timeout_ms": 30000
+    },
+    {
+      "queues": ["default"]
+    }
+  ]
+}

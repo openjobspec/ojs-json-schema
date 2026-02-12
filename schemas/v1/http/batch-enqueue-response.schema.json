@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openjobspec.org/schemas/v1/http/batch-enqueue-response.json",
+  "title": "OJS HTTP Batch Enqueue Response",
+  "description": "Response body for POST /ojs/v1/jobs/batch (201 Created). Returns summary information for all enqueued jobs.",
+  "type": "object",
+  "required": ["jobs", "count"],
+  "properties": {
+    "jobs": {
+      "title": "Created Jobs",
+      "description": "Array of created job summaries.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "state", "queue", "created_at"],
+        "properties": {
+          "id": {
+            "title": "Job ID",
+            "description": "UUIDv7 identifier assigned to the job.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "type": {
+            "title": "Job Type",
+            "description": "Dot-namespaced job type.",
+            "type": "string"
+          },
+          "state": {
+            "title": "Job State",
+            "description": "Initial lifecycle state.",
+            "type": "string",
+            "enum": ["available", "scheduled", "pending"]
+          },
+          "queue": {
+            "title": "Queue",
+            "description": "The queue the job was enqueued to.",
+            "type": "string"
+          },
+          "created_at": {
+            "title": "Created At",
+            "description": "ISO 8601 creation timestamp.",
+            "type": "string",
+            "format": "date-time"
+          },
+          "enqueued_at": {
+            "title": "Enqueued At",
+            "description": "ISO 8601 enqueue timestamp.",
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "count": {
+      "title": "Count",
+      "description": "Total number of jobs enqueued in this batch.",
+      "type": "integer",
+      "minimum": 1,
+      "examples": [3]
+    }
+  },
+  "additionalProperties": false,
+  "examples": [
+    {
+      "jobs": [
+        {
+          "id": "019414d4-8b30-7000-a001-000000000001",
+          "type": "email.send",
+          "state": "available",
+          "queue": "email",
+          "created_at": "2026-02-12T10:30:00.000Z",
+          "enqueued_at": "2026-02-12T10:30:00.200Z"
+        },
+        {
+          "id": "019414d4-8b30-7000-a001-000000000002",
+          "type": "email.send",
+          "state": "available",
+          "queue": "email",
+          "created_at": "2026-02-12T10:30:00.000Z",
+          "enqueued_at": "2026-02-12T10:30:00.200Z"
+        }
+      ],
+      "count": 2
+    }
+  ]
+}

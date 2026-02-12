@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openjobspec.org/schemas/v1/http/enqueue-request.json",
+  "title": "OJS HTTP Enqueue Request",
+  "description": "Request body for POST /ojs/v1/jobs. Enqueues a single job for processing.",
+  "type": "object",
+  "required": ["type", "args"],
+  "properties": {
+    "type": {
+      "title": "Job Type",
+      "description": "Dot-namespaced job type used for routing to the appropriate handler.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)*$",
+      "minLength": 1,
+      "maxLength": 255,
+      "examples": ["email.send", "report.generate"]
+    },
+    "args": {
+      "title": "Job Arguments",
+      "description": "Positional arguments for the job handler. JSON-native types only.",
+      "type": "array",
+      "items": true,
+      "examples": [
+        ["user@example.com", "welcome", {"locale": "en"}]
+      ]
+    },
+    "meta": {
+      "title": "Metadata",
+      "description": "Extensible key-value metadata for cross-cutting concerns.",
+      "type": "object",
+      "additionalProperties": true,
+      "examples": [
+        {
+          "trace_id": "trace_abc123def456",
+          "source": "signup-service"
+        }
+      ]
+    },
+    "schema": {
+      "title": "Schema URI",
+      "description": "Schema URI for payload validation.",
+      "type": "string",
+      "format": "uri",
+      "examples": ["urn:ojs:schema:email.send:v1"]
+    },
+    "options": {
+      "title": "Enqueue Options",
+      "description": "Enqueue options controlling queue, priority, timeout, retry, and more.",
+      "$ref": "https://openjobspec.org/schemas/v1/job-options.json"
+    }
+  },
+  "additionalProperties": false,
+  "examples": [
+    {
+      "type": "email.send",
+      "args": ["user@example.com", "welcome", {"locale": "en"}],
+      "meta": {
+        "trace_id": "trace_abc123def456",
+        "source": "signup-service"
+      },
+      "options": {
+        "queue": "email",
+        "priority": 0,
+        "timeout_ms": 30000,
+        "retry": {
+          "max_attempts": 5,
+          "initial_interval": "PT1S",
+          "backoff_coefficient": 2.0,
+          "max_interval": "PT5M",
+          "jitter": true
+        },
+        "tags": ["onboarding", "email"]
+      }
+    },
+    {
+      "type": "email.send",
+      "args": ["user@example.com", "welcome"]
+    }
+  ]
+}

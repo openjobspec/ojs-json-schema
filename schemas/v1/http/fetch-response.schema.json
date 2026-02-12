@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openjobspec.org/schemas/v1/http/fetch-response.json",
+  "title": "OJS HTTP Fetch Response",
+  "description": "Response body for POST /ojs/v1/workers/fetch (200 OK). Returns claimed jobs or an empty array if no work is available.",
+  "type": "object",
+  "required": ["jobs"],
+  "properties": {
+    "jobs": {
+      "title": "Claimed Jobs",
+      "description": "Array of claimed job envelopes. An empty array indicates no work is available (this is not an error).",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "state", "args", "queue", "attempt"],
+        "properties": {
+          "id": {
+            "title": "Job ID",
+            "description": "UUIDv7 job identifier.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "type": {
+            "title": "Job Type",
+            "description": "Dot-namespaced job type.",
+            "type": "string"
+          },
+          "state": {
+            "title": "Job State",
+            "description": "MUST be 'active' since the job has been claimed.",
+            "type": "string",
+            "const": "active"
+          },
+          "args": {
+            "title": "Job Arguments",
+            "description": "Positional arguments for the job handler.",
+            "type": "array",
+            "items": true
+          },
+          "meta": {
+            "title": "Metadata",
+            "description": "Job metadata.",
+            "type": "object",
+            "additionalProperties": true
+          },
+          "queue": {
+            "title": "Queue",
+            "description": "The queue the job was fetched from.",
+            "type": "string"
+          },
+          "attempt": {
+            "title": "Attempt",
+            "description": "Current attempt number (1-indexed).",
+            "type": "integer",
+            "minimum": 1
+          },
+          "max_attempts": {
+            "title": "Max Attempts",
+            "description": "Maximum number of attempts from the retry policy.",
+            "type": "integer"
+          },
+          "timeout_ms": {
+            "title": "Timeout (ms)",
+            "description": "Maximum execution time in milliseconds.",
+            "type": "integer"
+          },
+          "created_at": {
+            "title": "Created At",
+            "description": "ISO 8601 creation timestamp.",
+            "type": "string",
+            "format": "date-time"
+          },
+          "enqueued_at": {
+            "title": "Enqueued At",
+            "description": "ISO 8601 enqueue timestamp.",
+            "type": "string",
+            "format": "date-time"
+          },
+          "started_at": {
+            "title": "Started At",
+            "description": "ISO 8601 timestamp when the job was claimed.",
+            "type": "string",
+            "format": "date-time"
+          },
+          "tags": {
+            "title": "Tags",
+            "description": "Tags assigned to the job.",
+            "type": "array",
+            "items": {"type": "string"}
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": false,
+  "examples": [
+    {
+      "jobs": [
+        {
+          "id": "019414d4-8b2e-7c3a-b5d1-f0e2a3b4c5d6",
+          "type": "email.send",
+          "state": "active",
+          "args": ["user@example.com", "welcome", {"locale": "en"}],
+          "meta": {"trace_id": "trace_abc123def456"},
+          "queue": "email",
+          "attempt": 1,
+          "max_attempts": 5,
+          "timeout_ms": 30000,
+          "created_at": "2026-02-12T10:30:00.000Z",
+          "enqueued_at": "2026-02-12T10:30:00.123Z",
+          "started_at": "2026-02-12T10:30:05.000Z",
+          "tags": ["onboarding", "email"]
+        }
+      ]
+    },
+    {
+      "jobs": []
+    }
+  ]
+}

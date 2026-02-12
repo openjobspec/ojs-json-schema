@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openjobspec.org/schemas/v1/http/nack-request.json",
+  "title": "OJS HTTP NACK (Fail) Request",
+  "description": "Request body for POST /ojs/v1/workers/nack. Reports that a job handler failed with structured error information.",
+  "type": "object",
+  "required": ["job_id", "error"],
+  "properties": {
+    "job_id": {
+      "title": "Job ID",
+      "description": "The UUIDv7 of the failed job.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "examples": ["019414d4-8b2e-7c3a-b5d1-f0e2a3b4c5d6"]
+    },
+    "error": {
+      "title": "Error Information",
+      "description": "Structured error information describing the failure.",
+      "type": "object",
+      "required": ["code", "message"],
+      "properties": {
+        "code": {
+          "title": "Error Code",
+          "description": "Error code from the standard OJS error code vocabulary.",
+          "type": "string",
+          "enum": [
+            "handler_error",
+            "timeout",
+            "cancelled",
+            "invalid_payload",
+            "invalid_request",
+            "not_found",
+            "backend_error",
+            "rate_limited",
+            "duplicate",
+            "queue_paused",
+            "schema_validation",
+            "unsupported"
+          ],
+          "examples": ["handler_error", "timeout"]
+        },
+        "message": {
+          "title": "Error Message",
+          "description": "Human-readable error description.",
+          "type": "string",
+          "minLength": 1,
+          "examples": ["SMTP connection refused: Connection timed out after 10000ms"]
+        },
+        "retryable": {
+          "title": "Retryable",
+          "description": "Whether the client considers this error retryable.",
+          "type": "boolean",
+          "examples": [true, false]
+        },
+        "details": {
+          "title": "Error Details",
+          "description": "Additional error context (language-specific stack traces, connection details, etc.).",
+          "type": "object",
+          "additionalProperties": true,
+          "examples": [
+            {
+              "smtp_host": "mail.example.com",
+              "smtp_port": 587,
+              "error_class": "SMTPConnectionError"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "examples": [
+    {
+      "job_id": "019414d4-8b2e-7c3a-b5d1-f0e2a3b4c5d6",
+      "error": {
+        "code": "handler_error",
+        "message": "SMTP connection refused: Connection timed out after 10000ms",
+        "retryable": true,
+        "details": {
+          "smtp_host": "mail.example.com",
+          "smtp_port": 587,
+          "error_class": "SMTPConnectionError"
+        }
+      }
+    }
+  ]
+}

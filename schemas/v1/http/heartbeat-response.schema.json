@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openjobspec.org/schemas/v1/http/heartbeat-response.json",
+  "title": "OJS HTTP Heartbeat Response",
+  "description": "Response body for POST /ojs/v1/workers/heartbeat (200 OK). Returns the desired worker state directive and confirms which jobs had their visibility extended.",
+  "type": "object",
+  "required": ["state"],
+  "properties": {
+    "state": {
+      "title": "Worker State Directive",
+      "description": "Desired worker lifecycle state. 'running' means continue normal operation. 'quiet' means stop fetching new jobs but finish active ones. 'terminate' means shut down after active jobs complete.",
+      "type": "string",
+      "enum": ["running", "quiet", "terminate"],
+      "examples": ["running", "quiet", "terminate"]
+    },
+    "jobs_extended": {
+      "title": "Extended Job IDs",
+      "description": "List of job IDs whose visibility timeout was successfully extended.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "examples": [
+        ["019414d4-8b2e-7c3a-b5d1-f0e2a3b4c5d6"],
+        []
+      ]
+    },
+    "server_time": {
+      "title": "Server Time",
+      "description": "Current server time as an ISO 8601 timestamp. Useful for clock drift detection.",
+      "type": "string",
+      "format": "date-time",
+      "examples": ["2026-02-12T10:30:15.000Z"]
+    }
+  },
+  "additionalProperties": false,
+  "examples": [
+    {
+      "state": "running",
+      "jobs_extended": [
+        "019414d4-8b2e-7c3a-b5d1-f0e2a3b4c5d6"
+      ],
+      "server_time": "2026-02-12T10:30:15.000Z"
+    },
+    {
+      "state": "quiet",
+      "jobs_extended": [],
+      "server_time": "2026-02-12T10:30:15.000Z"
+    },
+    {
+      "state": "terminate",
+      "jobs_extended": [],
+      "server_time": "2026-02-12T10:30:15.000Z"
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openjobspec.org/schemas/v1/http/batch-enqueue-request.json",
+  "title": "OJS HTTP Batch Enqueue Request",
+  "description": "Request body for POST /ojs/v1/jobs/batch. Enqueues multiple jobs in a single atomic operation. Either all jobs are enqueued or none.",
+  "type": "object",
+  "required": ["jobs"],
+  "properties": {
+    "jobs": {
+      "title": "Jobs",
+      "description": "Array of job definitions to enqueue atomically. Each element follows the same schema as a single enqueue request.",
+      "type": "array",
+      "items": {
+        "$ref": "https://openjobspec.org/schemas/v1/http/enqueue-request.json"
+      },
+      "minItems": 1,
+      "maxItems": 10000
+    }
+  },
+  "additionalProperties": false,
+  "examples": [
+    {
+      "jobs": [
+        {
+          "type": "email.send",
+          "args": ["alice@example.com", "welcome", {"locale": "en"}],
+          "options": {
+            "queue": "email",
+            "tags": ["onboarding"]
+          }
+        },
+        {
+          "type": "email.send",
+          "args": ["bob@example.com", "welcome", {"locale": "fr"}],
+          "options": {
+            "queue": "email",
+            "tags": ["onboarding"]
+          }
+        },
+        {
+          "type": "email.send",
+          "args": ["carol@example.com", "welcome", {"locale": "de"}],
+          "options": {
+            "queue": "email",
+            "tags": ["onboarding"]
+          }
+        }
+      ]
+    }
+  ]
+}

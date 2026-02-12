@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openjobspec.org/schemas/v1/http/heartbeat-request.json",
+  "title": "OJS HTTP Heartbeat Request",
+  "description": "Request body for POST /ojs/v1/workers/heartbeat. Extends the visibility timeout of active jobs and reports worker liveness.",
+  "type": "object",
+  "required": ["worker_id"],
+  "properties": {
+    "worker_id": {
+      "title": "Worker ID",
+      "description": "Unique identifier for the worker process sending the heartbeat.",
+      "type": "string",
+      "minLength": 1,
+      "examples": ["worker_019414d4-aaaa-7000-c000-111111111111"]
+    },
+    "active_jobs": {
+      "title": "Active Job IDs",
+      "description": "List of job IDs the worker is currently processing. The server extends the visibility timeout for each listed job.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "examples": [
+        ["019414d4-8b2e-7c3a-b5d1-f0e2a3b4c5d6"],
+        []
+      ]
+    },
+    "visibility_timeout_ms": {
+      "title": "Visibility Timeout Extension (ms)",
+      "description": "Requested visibility extension in milliseconds for active jobs.",
+      "type": "integer",
+      "minimum": 1000,
+      "examples": [30000, 60000]
+    }
+  },
+  "additionalProperties": false,
+  "examples": [
+    {
+      "worker_id": "worker_019414d4-aaaa-7000-c000-111111111111",
+      "active_jobs": [
+        "019414d4-8b2e-7c3a-b5d1-f0e2a3b4c5d6"
+      ],
+      "visibility_timeout_ms": 30000
+    },
+    {
+      "worker_id": "worker_019414d4-aaaa-7000-c000-111111111111"
+    }
+  ]
+}

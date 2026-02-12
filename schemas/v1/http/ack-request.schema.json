@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openjobspec.org/schemas/v1/http/ack-request.json",
+  "title": "OJS HTTP ACK Request",
+  "description": "Request body for POST /ojs/v1/workers/ack. Acknowledges successful completion of a job.",
+  "type": "object",
+  "required": ["job_id"],
+  "properties": {
+    "job_id": {
+      "title": "Job ID",
+      "description": "The UUIDv7 of the job being acknowledged as completed.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "examples": ["019414d4-8b2e-7c3a-b5d1-f0e2a3b4c5d6"]
+    },
+    "result": {
+      "title": "Job Result",
+      "description": "Optional result data produced by the job handler. Can be any JSON-native value.",
+      "examples": [
+        {"message_id": "msg_019414d5-1234-7000-b000-aabbccddeeff", "delivered": true},
+        42,
+        "success",
+        null
+      ]
+    }
+  },
+  "additionalProperties": false,
+  "examples": [
+    {
+      "job_id": "019414d4-8b2e-7c3a-b5d1-f0e2a3b4c5d6",
+      "result": {
+        "message_id": "msg_019414d5-1234-7000-b000-aabbccddeeff",
+        "delivered": true
+      }
+    },
+    {
+      "job_id": "019414d4-8b2e-7c3a-b5d1-f0e2a3b4c5d6"
+    }
+  ]
+}
