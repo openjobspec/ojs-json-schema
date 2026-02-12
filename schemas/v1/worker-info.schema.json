@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openjobspec.org/schemas/v1/worker-info.json",
+  "title": "OJS Worker Info",
+  "description": "Worker registration and heartbeat information for OJS. Describes a worker process including its identity, subscribed queues, concurrency, lifecycle state, and active jobs.",
+  "type": "object",
+  "required": ["worker_id"],
+  "properties": {
+    "worker_id": {
+      "title": "Worker ID",
+      "description": "Globally unique identifier for the worker process. UUIDv7 RECOMMENDED.",
+      "type": "string",
+      "minLength": 1,
+      "examples": [
+        "worker_019414d4-aaaa-7000-c000-111111111111",
+        "worker-1"
+      ]
+    },
+    "hostname": {
+      "title": "Hostname",
+      "description": "Machine hostname where the worker process runs.",
+      "type": "string",
+      "examples": ["worker-node-01.example.com"]
+    },
+    "pid": {
+      "title": "Process ID",
+      "description": "Operating system process ID of the worker.",
+      "type": "integer",
+      "minimum": 1,
+      "examples": [12345, 67890]
+    },
+    "queues": {
+      "title": "Subscribed Queues",
+      "description": "Ordered list of queues the worker is subscribed to. Queue priority is left-to-right.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9][a-z0-9\\-\\.]*$"
+      },
+      "minItems": 1,
+      "examples": [
+        ["email", "default"],
+        ["default"]
+      ]
+    },
+    "concurrency": {
+      "title": "Concurrency",
+      "description": "Maximum number of jobs this worker can process in parallel.",
+      "type": "integer",
+      "minimum": 1,
+      "default": 10,
+      "examples": [1, 5, 10, 25]
+    },
+    "state": {
+      "title": "Worker State",
+      "description": "Current lifecycle state of the worker. 'running' is normal operation, 'quiet' means stop fetching but finish active jobs, 'terminate' means shut down after active jobs complete.",
+      "type": "string",
+      "enum": ["running", "quiet", "terminate"],
+      "examples": ["running", "quiet", "terminate"]
+    },
+    "labels": {
+      "title": "Labels",
+      "description": "Arbitrary labels for worker filtering and identification.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "examples": [
+        ["canary", "v2.1"],
+        ["production", "us-east-1"]
+      ]
+    },
+    "active_jobs": {
+      "title": "Active Job Count",
+      "description": "Number of jobs currently being processed by this worker.",
+      "type": "integer",
+      "minimum": 0,
+      "examples": [0, 3, 10]
+    },
+    "active_job_ids": {
+      "title": "Active Job IDs",
+      "description": "IDs of all jobs currently being processed by this worker.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "examples": [
+        ["019414d4-8b2e-7c3a-b5d1-f0e2a3b4c5d6"],
+        []
+      ]
+    },
+    "started_at": {
+      "title": "Started At",
+      "description": "ISO 8601 timestamp of when the worker process started.",
+      "type": "string",
+      "format": "date-time",
+      "examples": ["2026-02-12T08:00:00.000Z"]
+    },
+    "last_heartbeat_at": {
+      "title": "Last Heartbeat At",
+      "description": "ISO 8601 timestamp of the worker's most recent heartbeat. System-managed.",
+      "type": "string",
+      "format": "date-time",
+      "examples": ["2026-02-12T10:30:15.000Z"]
+    }
+  },
+  "additionalProperties": true,
+  "examples": [
+    {
+      "worker_id": "worker_019414d4-aaaa-7000-c000-111111111111",
+      "hostname": "worker-node-01.example.com",
+      "pid": 12345,
+      "queues": ["email", "default"],
+      "concurrency": 10,
+      "state": "running",
+      "labels": ["production", "us-east-1"],
+      "active_jobs": 3,
+      "active_job_ids": [
+        "019414d4-8b2e-7c3a-b5d1-f0e2a3b4c5d6"
+      ],
+      "started_at": "2026-02-12T08:00:00.000Z",
+      "last_heartbeat_at": "2026-02-12T10:30:15.000Z"
+    }
+  ]
+}

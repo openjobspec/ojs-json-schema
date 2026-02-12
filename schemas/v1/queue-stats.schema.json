@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openjobspec.org/schemas/v1/queue-stats.json",
+  "title": "OJS Queue Statistics",
+  "description": "Detailed statistics for an OJS queue, including job counts by state, throughput metrics, and timing information.",
+  "type": "object",
+  "required": ["queue", "status", "stats", "computed_at"],
+  "properties": {
+    "queue": {
+      "title": "Queue Name",
+      "description": "The name of the queue these statistics apply to.",
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9\\-\\.]*$",
+      "examples": ["default", "email", "reports"]
+    },
+    "status": {
+      "title": "Queue Status",
+      "description": "Current operational status of the queue.",
+      "type": "string",
+      "enum": ["active", "paused"],
+      "examples": ["active", "paused"]
+    },
+    "stats": {
+      "title": "Statistics",
+      "description": "Detailed statistical counters and metrics for the queue.",
+      "type": "object",
+      "properties": {
+        "available": {
+          "title": "Available Jobs",
+          "description": "Number of jobs in the 'available' state, ready for pickup.",
+          "type": "integer",
+          "minimum": 0,
+          "examples": [1234]
+        },
+        "active": {
+          "title": "Active Jobs",
+          "description": "Number of jobs currently being executed by workers.",
+          "type": "integer",
+          "minimum": 0,
+          "examples": [42]
+        },
+        "scheduled": {
+          "title": "Scheduled Jobs",
+          "description": "Number of jobs waiting for their scheduled execution time.",
+          "type": "integer",
+          "minimum": 0,
+          "examples": [56]
+        },
+        "retryable": {
+          "title": "Retryable Jobs",
+          "description": "Number of jobs waiting to be retried after a failure.",
+          "type": "integer",
+          "minimum": 0,
+          "examples": [8]
+        },
+        "discarded": {
+          "title": "Discarded Jobs",
+          "description": "Number of jobs that have been permanently discarded (dead letter).",
+          "type": "integer",
+          "minimum": 0,
+          "examples": [3]
+        },
+        "completed_last_hour": {
+          "title": "Completed Last Hour",
+          "description": "Number of jobs successfully completed in the last hour.",
+          "type": "integer",
+          "minimum": 0,
+          "examples": [8920]
+        },
+        "failed_last_hour": {
+          "title": "Failed Last Hour",
+          "description": "Number of jobs that failed in the last hour.",
+          "type": "integer",
+          "minimum": 0,
+          "examples": [12]
+        },
+        "avg_duration_ms": {
+          "title": "Average Duration (ms)",
+          "description": "Average job execution duration in milliseconds.",
+          "type": "number",
+          "minimum": 0,
+          "examples": [234]
+        },
+        "avg_wait_ms": {
+          "title": "Average Wait Time (ms)",
+          "description": "Average time jobs spend waiting in queue before being claimed, in milliseconds.",
+          "type": "number",
+          "minimum": 0,
+          "examples": [1456]
+        },
+        "throughput_per_second": {
+          "title": "Throughput Per Second",
+          "description": "Current throughput measured in jobs completed per second.",
+          "type": "number",
+          "minimum": 0,
+          "examples": [2.48]
+        }
+      },
+      "additionalProperties": true
+    },
+    "computed_at": {
+      "title": "Computed At",
+      "description": "ISO 8601 timestamp when these statistics were computed.",
+      "type": "string",
+      "format": "date-time",
+      "examples": ["2026-02-12T10:30:00.000Z"]
+    }
+  },
+  "additionalProperties": false,
+  "examples": [
+    {
+      "queue": "email",
+      "status": "active",
+      "stats": {
+        "available": 1234,
+        "active": 42,
+        "scheduled": 56,
+        "retryable": 8,
+        "discarded": 3,
+        "completed_last_hour": 8920,
+        "failed_last_hour": 12,
+        "avg_duration_ms": 234,
+        "avg_wait_ms": 1456,
+        "throughput_per_second": 2.48
+      },
+      "computed_at": "2026-02-12T10:30:00.000Z"
+    }
+  ]
+}

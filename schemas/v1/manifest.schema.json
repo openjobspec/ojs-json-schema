@@ -1,0 +1,240 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openjobspec.org/schemas/v1/manifest.json",
+  "title": "OJS Conformance Manifest",
+  "description": "Conformance manifest for an OJS implementation. Describes the implementation's capabilities, supported conformance level, available protocol bindings, and feature flags. Served at GET /ojs/manifest.",
+  "type": "object",
+  "required": [
+    "ojs_version",
+    "implementation",
+    "conformance_level",
+    "protocols",
+    "backend",
+    "capabilities"
+  ],
+  "properties": {
+    "ojs_version": {
+      "title": "OJS Version",
+      "description": "OJS specification version implemented by this server.",
+      "type": "string",
+      "examples": ["1.0.0-rc.1"]
+    },
+    "implementation": {
+      "title": "Implementation Details",
+      "description": "Metadata about the OJS implementation.",
+      "type": "object",
+      "required": ["name", "version", "language"],
+      "properties": {
+        "name": {
+          "title": "Implementation Name",
+          "description": "Name of the implementation (e.g., 'ojs-redis', 'ojs-postgres').",
+          "type": "string",
+          "minLength": 1,
+          "examples": ["ojs-redis", "ojs-postgres", "ojs-memory"]
+        },
+        "version": {
+          "title": "Implementation Version",
+          "description": "Version of the implementation.",
+          "type": "string",
+          "examples": ["1.0.0", "0.9.0-beta"]
+        },
+        "language": {
+          "title": "Implementation Language",
+          "description": "Primary programming language of the implementation.",
+          "type": "string",
+          "examples": ["go", "python", "javascript", "rust", "java"]
+        },
+        "homepage": {
+          "title": "Homepage",
+          "description": "URL to the implementation's homepage or repository.",
+          "type": "string",
+          "format": "uri",
+          "examples": ["https://github.com/openjobspec/ojs-backend-redis"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "conformance_level": {
+      "title": "Conformance Level",
+      "description": "Highest conformance level supported (0-4). Level 0: Core. Level 1: Reliable. Level 2: Scheduled. Level 3: Orchestration. Level 4: Advanced.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4,
+      "examples": [0, 1, 2, 3, 4]
+    },
+    "conformance_tier": {
+      "title": "Conformance Tier",
+      "description": "Depth of implementation. 'parser' validates envelopes only. 'runtime' executes jobs. 'full' supports all optional features and both HTTP and gRPC.",
+      "type": "string",
+      "enum": ["parser", "runtime", "full"],
+      "examples": ["runtime", "full"]
+    },
+    "protocols": {
+      "title": "Supported Protocols",
+      "description": "Supported protocol bindings. MUST include 'http' since HTTP is the required baseline.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "contains": {
+        "const": "http"
+      },
+      "minItems": 1,
+      "examples": [
+        ["http"],
+        ["http", "grpc"]
+      ]
+    },
+    "backend": {
+      "title": "Backend Type",
+      "description": "The storage/transport backend type used by this implementation.",
+      "type": "string",
+      "examples": ["redis", "postgres", "memory", "kafka", "sqs"]
+    },
+    "capabilities": {
+      "title": "Capabilities",
+      "description": "Feature flags for optional capabilities. Provides granular feature detection beyond the coarse conformance level.",
+      "type": "object",
+      "properties": {
+        "batch_enqueue": {
+          "title": "Batch Enqueue",
+          "description": "Whether atomic batch enqueue is supported.",
+          "type": "boolean",
+          "examples": [true, false]
+        },
+        "cron_jobs": {
+          "title": "Cron Jobs",
+          "description": "Whether recurring/periodic job scheduling is supported.",
+          "type": "boolean",
+          "examples": [true, false]
+        },
+        "dead_letter": {
+          "title": "Dead Letter Queue",
+          "description": "Whether dead letter queue management is supported.",
+          "type": "boolean",
+          "examples": [true, false]
+        },
+        "delayed_jobs": {
+          "title": "Delayed Jobs",
+          "description": "Whether scheduling jobs for future execution is supported.",
+          "type": "boolean",
+          "examples": [true, false]
+        },
+        "job_ttl": {
+          "title": "Job TTL",
+          "description": "Whether job expiration (time-to-live) is supported.",
+          "type": "boolean",
+          "examples": [true, false]
+        },
+        "priority_queues": {
+          "title": "Priority Queues",
+          "description": "Whether priority-based job ordering within queues is supported.",
+          "type": "boolean",
+          "examples": [true, false]
+        },
+        "rate_limiting": {
+          "title": "Rate Limiting",
+          "description": "Whether server-side rate limiting is supported.",
+          "type": "boolean",
+          "examples": [true, false]
+        },
+        "schema_validation": {
+          "title": "Schema Validation",
+          "description": "Whether job argument schema validation is supported.",
+          "type": "boolean",
+          "examples": [true, false]
+        },
+        "unique_jobs": {
+          "title": "Unique Jobs",
+          "description": "Whether job deduplication is supported.",
+          "type": "boolean",
+          "examples": [true, false]
+        },
+        "workflows": {
+          "title": "Workflows",
+          "description": "Whether workflow primitives (chain, group, batch) are supported.",
+          "type": "boolean",
+          "examples": [true, false]
+        },
+        "pause_resume": {
+          "title": "Pause/Resume",
+          "description": "Whether queue pause and resume operations are supported.",
+          "type": "boolean",
+          "examples": [true, false]
+        }
+      },
+      "additionalProperties": true
+    },
+    "extensions": {
+      "title": "Extensions",
+      "description": "List of non-standard extensions supported by this implementation.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "examples": [[], ["x_redis_streams", "x_pg_notify"]]
+    },
+    "endpoints": {
+      "title": "Endpoints",
+      "description": "Base URL and key endpoint paths for service discovery.",
+      "type": "object",
+      "properties": {
+        "base_url": {
+          "title": "Base URL",
+          "description": "Base URL for the OJS API.",
+          "type": "string",
+          "format": "uri",
+          "examples": ["https://jobs.example.com/ojs/v1"]
+        },
+        "manifest": {
+          "title": "Manifest Path",
+          "description": "Path to the manifest endpoint.",
+          "type": "string",
+          "examples": ["/ojs/manifest"]
+        },
+        "health": {
+          "title": "Health Path",
+          "description": "Path to the health check endpoint.",
+          "type": "string",
+          "examples": ["/ojs/v1/health"]
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true,
+  "examples": [
+    {
+      "ojs_version": "1.0.0-rc.1",
+      "implementation": {
+        "name": "ojs-redis",
+        "version": "1.0.0",
+        "language": "go",
+        "homepage": "https://github.com/openjobspec/ojs-backend-redis"
+      },
+      "conformance_level": 2,
+      "protocols": ["http"],
+      "backend": "redis",
+      "capabilities": {
+        "batch_enqueue": true,
+        "cron_jobs": true,
+        "dead_letter": true,
+        "delayed_jobs": true,
+        "job_ttl": true,
+        "priority_queues": false,
+        "rate_limiting": false,
+        "schema_validation": true,
+        "unique_jobs": false,
+        "workflows": false,
+        "pause_resume": false
+      },
+      "extensions": [],
+      "endpoints": {
+        "base_url": "https://jobs.example.com/ojs/v1",
+        "manifest": "/ojs/manifest",
+        "health": "/ojs/v1/health"
+      }
+    }
+  ]
+}
