@@ -1,0 +1,273 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openjobspec.org/schemas/v1/workflow.json",
+  "title": "OJS Workflow",
+  "description": "Workflow definition for composing OJS jobs into sequential (chain), parallel (group), or fan-out/fan-in (batch) patterns. Supports nesting of primitives up to 3 levels deep.",
+  "type": "object",
+  "required": ["type"],
+  "properties": {
+    "type": {
+      "title": "Workflow Type",
+      "description": "The workflow primitive type. 'chain' for sequential execution, 'group' for parallel execution, 'batch' for parallel with callbacks.",
+      "type": "string",
+      "enum": ["chain", "group", "batch"],
+      "examples": ["chain", "group", "batch"]
+    },
+    "id": {
+      "title": "Workflow ID",
+      "description": "Globally unique workflow identifier. UUIDv7 RECOMMENDED.",
+      "type": "string",
+      "examples": ["019414d4-dddd-7000-e000-000000000001"]
+    },
+    "name": {
+      "title": "Workflow Name",
+      "description": "Human-readable display name for the workflow.",
+      "type": "string",
+      "examples": ["onboarding-pipeline", "daily-report-workflow"]
+    },
+    "steps": {
+      "title": "Chain Steps",
+      "description": "Ordered array of job definitions for chain workflows. Steps execute sequentially: step N must complete before step N+1 begins.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/workflow_step"
+      },
+      "minItems": 1
+    },
+    "jobs": {
+      "title": "Group/Batch Jobs",
+      "description": "Array of job definitions for group or batch workflows. All jobs execute in parallel.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/workflow_step"
+      },
+      "minItems": 1
+    },
+    "callbacks": {
+      "title": "Batch Callbacks",
+      "description": "Callback definitions for batch workflows. At least one callback MUST be provided for batch type.",
+      "type": "object",
+      "properties": {
+        "on_complete": {
+          "title": "On Complete Callback",
+          "description": "Job to execute when ALL batch jobs finish (regardless of success or failure).",
+          "$ref": "#/$defs/workflow_step"
+        },
+        "on_success": {
+          "title": "On Success Callback",
+          "description": "Job to execute only if ALL batch jobs succeeded.",
+          "$ref": "#/$defs/workflow_step"
+        },
+        "on_failure": {
+          "title": "On Failure Callback",
+          "description": "Job to execute if ANY batch job failed.",
+          "$ref": "#/$defs/workflow_step"
+        }
+      },
+      "additionalProperties": false,
+      "anyOf": [
+        {"required": ["on_complete"]},
+        {"required": ["on_success"]},
+        {"required": ["on_failure"]}
+      ]
+    },
+    "options": {
+      "title": "Default Options",
+      "description": "Default enqueue options applied to all steps/jobs in the workflow. Per-step options override these defaults.",
+      "$ref": "https://openjobspec.org/schemas/v1/job-options.json"
+    },
+    "state": {
+      "title": "Workflow State",
+      "description": "Current workflow lifecycle state. System-managed.",
+      "type": "string",
+      "enum": ["pending", "running", "completed", "failed", "cancelled"],
+      "examples": ["pending", "running", "completed"]
+    },
+    "metadata": {
+      "title": "Workflow Metadata",
+      "description": "System-managed timestamps and counters for the workflow.",
+      "type": "object",
+      "properties": {
+        "created_at": {
+          "title": "Created At",
+          "description": "ISO 8601 timestamp of workflow creation.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "started_at": {
+          "title": "Started At",
+          "description": "ISO 8601 timestamp of first step execution.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "completed_at": {
+          "title": "Completed At",
+          "description": "ISO 8601 timestamp of workflow completion.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "job_count": {
+          "title": "Total Job Count",
+          "description": "Total number of jobs in the workflow.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "completed_count": {
+          "title": "Completed Count",
+          "description": "Number of completed jobs.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "failed_count": {
+          "title": "Failed Count",
+          "description": "Number of failed jobs.",
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {"type": {"const": "chain"}}
+      },
+      "then": {
+        "required": ["steps"]
+      }
+    },
+    {
+      "if": {
+        "properties": {"type": {"const": "group"}}
+      },
+      "then": {
+        "required": ["jobs"]
+      }
+    },
+    {
+      "if": {
+        "properties": {"type": {"const": "batch"}}
+      },
+      "then": {
+        "required": ["jobs", "callbacks"]
+      }
+    }
+  ],
+  "additionalProperties": true,
+  "$defs": {
+    "workflow_step": {
+      "title": "Workflow Step",
+      "description": "A single step or job within a workflow. Defines the job type, arguments, and optional dependencies.",
+      "type": "object",
+      "required": ["type", "args"],
+      "properties": {
+        "id": {
+          "title": "Step ID",
+          "description": "Unique step identifier within the workflow.",
+          "type": "string",
+          "examples": ["send-welcome", "create-profile"]
+        },
+        "type": {
+          "title": "Job Type",
+          "description": "OJS job type for this step.",
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)*$",
+          "examples": ["email.send", "user.create_profile"]
+        },
+        "args": {
+          "title": "Job Arguments",
+          "description": "Positional arguments for the job handler.",
+          "type": "array",
+          "items": true
+        },
+        "depends_on": {
+          "title": "Dependencies",
+          "description": "IDs of steps that must complete before this step can execute.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true,
+          "examples": [[], ["send-welcome", "create-profile"]]
+        },
+        "options": {
+          "title": "Step Options",
+          "description": "Per-step enqueue option overrides.",
+          "$ref": "https://openjobspec.org/schemas/v1/job-options.json"
+        },
+        "state": {
+          "title": "Step State",
+          "description": "Current state of this step. System-managed.",
+          "type": "string",
+          "enum": ["waiting", "pending", "available", "active", "completed", "failed", "cancelled"]
+        },
+        "job_id": {
+          "title": "Job ID",
+          "description": "ID of the OJS job created for this step. Null if the step has not been enqueued yet. System-managed.",
+          "type": ["string", "null"]
+        },
+        "started_at": {
+          "title": "Started At",
+          "description": "ISO 8601 timestamp when step execution began. System-managed.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "completed_at": {
+          "title": "Completed At",
+          "description": "ISO 8601 timestamp when step completed. System-managed.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "result": {
+          "title": "Step Result",
+          "description": "Return value from the step's job handler. System-managed."
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "examples": [
+    {
+      "type": "chain",
+      "name": "onboarding-pipeline",
+      "steps": [
+        {
+          "id": "send-welcome",
+          "type": "email.send",
+          "args": ["user@example.com", "welcome"],
+          "depends_on": []
+        },
+        {
+          "id": "create-profile",
+          "type": "user.create_profile",
+          "args": ["user@example.com", {"plan": "free"}],
+          "depends_on": ["send-welcome"]
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "name": "parallel-notifications",
+      "jobs": [
+        {"type": "email.send", "args": ["alice@example.com", "welcome"]},
+        {"type": "email.send", "args": ["bob@example.com", "welcome"]},
+        {"type": "email.send", "args": ["carol@example.com", "welcome"]}
+      ]
+    },
+    {
+      "type": "batch",
+      "name": "report-batch",
+      "jobs": [
+        {"type": "report.generate", "args": ["q1"]},
+        {"type": "report.generate", "args": ["q2"]}
+      ],
+      "callbacks": {
+        "on_complete": {
+          "type": "notification.send",
+          "args": ["Reports finished"]
+        }
+      }
+    }
+  ]
+}

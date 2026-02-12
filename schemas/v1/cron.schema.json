@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openjobspec.org/schemas/v1/cron.json",
+  "title": "OJS Cron Job",
+  "description": "Cron job registration for OJS recurring/periodic job schedules. Defines the cron expression, timezone, job type, arguments, and overlap policy.",
+  "type": "object",
+  "required": ["name", "cron", "type"],
+  "properties": {
+    "name": {
+      "title": "Cron Job Name",
+      "description": "Unique name for the cron schedule. MUST be lowercase alphanumeric with hyphens and dots, starting with an alphanumeric character. Maximum 255 characters. Serves as the primary key.",
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9\\-\\.]*$",
+      "maxLength": 255,
+      "examples": ["daily-report", "hourly-cleanup", "billing.process.monthly"]
+    },
+    "cron": {
+      "title": "Cron Expression",
+      "description": "Cron expression defining the schedule. Supports 5-field (minute hour day month weekday) or 6-field (second minute hour day month weekday) format, plus special expressions (@daily, @hourly, @monthly, @yearly, @weekly).",
+      "type": "string",
+      "minLength": 1,
+      "examples": [
+        "0 9 * * *",
+        "0 * * * *",
+        "*/5 * * * *",
+        "0 0 1 * *",
+        "@daily",
+        "@hourly"
+      ]
+    },
+    "timezone": {
+      "title": "Timezone",
+      "description": "IANA timezone name for schedule evaluation. MUST be a valid IANA timezone identifier. Default is 'UTC'.",
+      "type": "string",
+      "default": "UTC",
+      "examples": ["UTC", "America/New_York", "Europe/London", "Asia/Tokyo"]
+    },
+    "type": {
+      "title": "Job Type",
+      "description": "OJS job type to create on each trigger. MUST follow the dot-namespaced convention.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)*$",
+      "minLength": 1,
+      "examples": ["report.generate", "cache.warm", "maintenance.cleanup"]
+    },
+    "args": {
+      "title": "Job Arguments",
+      "description": "Arguments passed to each triggered job. MUST be JSON-native types only.",
+      "type": "array",
+      "items": true,
+      "default": [],
+      "examples": [
+        ["daily_summary"],
+        [{"older_than_days": 30}]
+      ]
+    },
+    "meta": {
+      "title": "Job Metadata",
+      "description": "Metadata to attach to each triggered job.",
+      "type": "object",
+      "additionalProperties": true,
+      "examples": [
+        {"owner": "analytics-team"}
+      ]
+    },
+    "options": {
+      "title": "Job Options",
+      "description": "Enqueue options applied to each triggered job.",
+      "$ref": "https://openjobspec.org/schemas/v1/job-options.json"
+    },
+    "overlap_policy": {
+      "title": "Overlap Policy",
+      "description": "Behavior when a new occurrence fires while the previous run is still active. 'skip' skips the new occurrence. 'allow' permits concurrent executions. 'cancel_previous' cancels the active run. 'enqueue' queues the new run. Default is 'skip'.",
+      "type": "string",
+      "enum": ["skip", "allow", "cancel_previous", "enqueue"],
+      "default": "skip",
+      "examples": ["skip", "allow", "cancel_previous", "enqueue"]
+    },
+    "enabled": {
+      "title": "Enabled",
+      "description": "Whether this cron job is active. Disabled jobs remain registered but do not fire. Default is true.",
+      "type": "boolean",
+      "default": true,
+      "examples": [true, false]
+    },
+    "description": {
+      "title": "Description",
+      "description": "Human-readable description for documentation and dashboards.",
+      "type": "string",
+      "examples": ["Generate daily summary report at 9 AM EST"]
+    },
+    "status": {
+      "title": "Status",
+      "description": "Current status of the cron job. System-managed.",
+      "type": "string",
+      "enum": ["active", "paused", "disabled"],
+      "examples": ["active"]
+    },
+    "last_run_at": {
+      "title": "Last Run At",
+      "description": "Timestamp of the most recent trigger. Null if never fired. System-managed.",
+      "type": ["string", "null"],
+      "format": "date-time",
+      "examples": ["2026-02-12T09:00:00.000Z", null]
+    },
+    "next_run_at": {
+      "title": "Next Run At",
+      "description": "Timestamp of next scheduled trigger. Null if disabled. System-managed.",
+      "type": ["string", "null"],
+      "format": "date-time",
+      "examples": ["2026-02-13T09:00:00.000Z", null]
+    },
+    "run_count": {
+      "title": "Run Count",
+      "description": "Total number of times this cron job has been triggered since registration. System-managed.",
+      "type": "integer",
+      "minimum": 0,
+      "examples": [0, 42, 365]
+    },
+    "created_at": {
+      "title": "Created At",
+      "description": "Timestamp when the cron job was registered. System-managed.",
+      "type": "string",
+      "format": "date-time",
+      "examples": ["2026-01-01T00:00:00.000Z"]
+    }
+  },
+  "additionalProperties": false,
+  "examples": [
+    {
+      "name": "daily-report",
+      "cron": "0 9 * * *",
+      "timezone": "America/New_York",
+      "type": "report.generate",
+      "args": ["daily_summary"],
+      "options": {
+        "queue": "reports",
+        "timeout_ms": 300000
+      }
+    },
+    {
+      "name": "hourly-cleanup",
+      "cron": "0 * * * *",
+      "timezone": "UTC",
+      "type": "maintenance.cleanup",
+      "args": [{"older_than_days": 30}],
+      "options": {
+        "queue": "default",
+        "timeout_ms": 60000
+      },
+      "overlap_policy": "skip"
+    }
+  ]
+}

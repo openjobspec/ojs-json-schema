@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openjobspec.org/schemas/v1/event.json",
+  "title": "OJS Lifecycle Event",
+  "description": "Lifecycle event envelope for OJS. Follows a CloudEvents-inspired structure with required context attributes and event-specific data payloads. Events enable observability, monitoring, and integration across OJS implementations.",
+  "type": "object",
+  "required": ["specversion", "id", "type", "source", "time"],
+  "properties": {
+    "specversion": {
+      "title": "Event Spec Version",
+      "description": "The OJS events specification version. MUST be '1.0' for this version.",
+      "type": "string",
+      "const": "1.0",
+      "examples": ["1.0"]
+    },
+    "id": {
+      "title": "Event ID",
+      "description": "Globally unique event identifier for deduplication. UUIDv7 with 'evt_' prefix is RECOMMENDED.",
+      "type": "string",
+      "minLength": 1,
+      "examples": [
+        "evt_019539a4-b68c-7def-8000-aabbccddeeff",
+        "evt_019461a8-1a2b-7c3d-8e4f-5a6b7c8d9e0f"
+      ]
+    },
+    "type": {
+      "title": "Event Type",
+      "description": "Event type from the OJS event catalog. Dot-namespaced identifier indicating the category and specific event.",
+      "type": "string",
+      "enum": [
+        "job.enqueued",
+        "job.started",
+        "job.completed",
+        "job.failed",
+        "job.discarded",
+        "job.retrying",
+        "job.cancelled",
+        "job.heartbeat",
+        "job.scheduled",
+        "job.expired",
+        "job.progress",
+        "queue.paused",
+        "queue.resumed",
+        "worker.started",
+        "worker.stopped",
+        "worker.quiet",
+        "worker.heartbeat",
+        "workflow.started",
+        "workflow.step_completed",
+        "workflow.completed",
+        "workflow.failed",
+        "cron.triggered",
+        "cron.skipped"
+      ],
+      "examples": ["job.enqueued", "job.completed", "job.failed", "worker.started"]
+    },
+    "source": {
+      "title": "Event Source",
+      "description": "URI identifying the context where the event was produced. RECOMMENDED format: 'ojs://{service}/{component}/{instance}'.",
+      "type": "string",
+      "format": "uri",
+      "minLength": 1,
+      "examples": [
+        "ojs://my-service/workers/worker-1",
+        "ojs://my-service/scheduler/main",
+        "ojs://my-service/api/instance-1"
+      ]
+    },
+    "time": {
+      "title": "Event Time",
+      "description": "Timestamp when the event was emitted. MUST be ISO 8601 / RFC 3339 with timezone. UTC with 'Z' suffix is RECOMMENDED.",
+      "type": "string",
+      "format": "date-time",
+      "examples": ["2026-02-12T10:30:00.000Z"]
+    },
+    "subject": {
+      "title": "Event Subject",
+      "description": "Subject of the event, typically the job ID, queue name, worker ID, or workflow ID.",
+      "type": "string",
+      "examples": [
+        "019461a8-1a2b-7c3d-8e4f-5a6b7c8d9e0f",
+        "email",
+        "worker-1"
+      ]
+    },
+    "datacontenttype": {
+      "title": "Data Content Type",
+      "description": "Content type of the data field. Defaults to 'application/json'.",
+      "type": "string",
+      "default": "application/json",
+      "examples": ["application/json"]
+    },
+    "data": {
+      "title": "Event Data",
+      "description": "Event-specific payload. Structure depends on the event type.",
+      "type": "object",
+      "additionalProperties": true,
+      "examples": [
+        {
+          "job_type": "email.send",
+          "queue": "email",
+          "priority": 0
+        },
+        {
+          "job_type": "email.send",
+          "queue": "email",
+          "duration_ms": 1234,
+          "attempt": 1,
+          "result": {"delivered": true}
+        }
+      ]
+    }
+  },
+  "additionalProperties": true,
+  "examples": [
+    {
+      "specversion": "1.0",
+      "id": "evt_019539a4-b68c-7def-8000-aabbccddeeff",
+      "type": "job.completed",
+      "source": "ojs://my-service/workers/worker-1",
+      "time": "2026-02-12T10:30:02.789Z",
+      "subject": "019461a8-1a2b-7c3d-8e4f-5a6b7c8d9e0f",
+      "data": {
+        "job_type": "email.send",
+        "queue": "email",
+        "duration_ms": 1333,
+        "attempt": 1,
+        "result": {"message_id": "msg_abc123", "delivered": true}
+      }
+    },
+    {
+      "specversion": "1.0",
+      "id": "evt_019539a4-c79d-7def-8000-bbccddeeff00",
+      "type": "job.failed",
+      "source": "ojs://my-service/workers/worker-1",
+      "time": "2026-02-12T10:30:05.000Z",
+      "subject": "019461a8-4d5e-7f60-b172-8c9d0e1f2a3b",
+      "data": {
+        "job_type": "data.sync",
+        "queue": "default",
+        "attempt": 2,
+        "error": {
+          "code": "handler_error",
+          "message": "Connection to target_db timed out",
+          "retryable": true
+        },
+        "duration_ms": 60000
+      }
+    }
+  ]
+}
