@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openjobspec.org/schemas/v1/job-options.json",
+  "title": "OJS Job Options",
+  "description": "Enqueue options for an OJS job. These options control queue routing, priority, timeouts, retry behavior, uniqueness, and scheduling.",
+  "type": "object",
+  "properties": {
+    "queue": {
+      "title": "Target Queue",
+      "description": "The target queue for the job. MUST be lowercase alphanumeric with hyphens and dots, starting with an alphanumeric character. Maximum 128 characters. Default is 'default'.",
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9\\-\\.]*$",
+      "maxLength": 128,
+      "default": "default",
+      "examples": ["default", "email", "reports", "high-priority", "billing.invoices"]
+    },
+    "priority": {
+      "title": "Job Priority",
+      "description": "Job priority within a queue. Higher numbers indicate higher priority. Implementations MUST support at least the range -100 to 100. Named levels: HIGH=10, NORMAL=0, LOW=-10. Default is 0.",
+      "type": "integer",
+      "minimum": -100,
+      "maximum": 100,
+      "default": 0,
+      "examples": [-10, 0, 10]
+    },
+    "timeout_ms": {
+      "title": "Execution Timeout (ms)",
+      "description": "Maximum execution time for the job in milliseconds. If exceeded, the implementation MUST treat it as a failure with error type 'timeout'. A value of 0 means no timeout. Default is 30000 (30 seconds).",
+      "type": "integer",
+      "minimum": 0,
+      "default": 30000,
+      "examples": [5000, 30000, 60000, 300000, 1800000]
+    },
+    "delay_until": {
+      "title": "Delayed Execution",
+      "description": "ISO 8601 / RFC 3339 timestamp for delayed execution. If set to a future time, the job enters the 'scheduled' state instead of 'available'.",
+      "type": "string",
+      "format": "date-time",
+      "examples": ["2026-03-15T09:30:00Z", "2026-03-15T09:30:00+02:00"]
+    },
+    "expires_at": {
+      "title": "Expiration Deadline",
+      "description": "ISO 8601 / RFC 3339 timestamp after which the job should be discarded if it has not yet started execution.",
+      "type": "string",
+      "format": "date-time",
+      "examples": ["2026-03-15T18:00:00Z"]
+    },
+    "retry": {
+      "title": "Retry Policy",
+      "description": "Retry policy override for this job. Controls behavior when execution fails.",
+      "$ref": "https://openjobspec.org/schemas/v1/retry-policy.json"
+    },
+    "unique": {
+      "title": "Unique Policy",
+      "description": "Unique job / deduplication policy for this job.",
+      "$ref": "https://openjobspec.org/schemas/v1/unique-policy.json"
+    },
+    "tags": {
+      "title": "Tags",
+      "description": "Tags for filtering and observability. Each tag is a non-empty string.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true,
+      "default": [],
+      "examples": [
+        ["onboarding", "email"],
+        ["high-priority", "billing"]
+      ]
+    },
+    "visibility_timeout_ms": {
+      "title": "Visibility Timeout (ms)",
+      "description": "Reservation period in milliseconds before a job is reclaimed if the worker does not ACK or FAIL it. Prevents job loss when workers crash. Default is 30000 (30 seconds).",
+      "type": "integer",
+      "minimum": 1000,
+      "default": 30000,
+      "examples": [10000, 30000, 60000, 1800000]
+    }
+  },
+  "additionalProperties": false,
+  "examples": [
+    {
+      "queue": "email",
+      "priority": 0,
+      "timeout_ms": 30000,
+      "retry": {
+        "max_attempts": 5,
+        "initial_interval": "PT1S",
+        "backoff_coefficient": 2.0,
+        "max_interval": "PT5M",
+        "jitter": true
+      },
+      "tags": ["onboarding", "email"]
+    },
+    {
+      "queue": "default"
+    },
+    {
+      "queue": "reports",
+      "priority": 10,
+      "timeout_ms": 300000,
+      "delay_until": "2026-03-01T09:00:00Z",
+      "expires_at": "2026-03-01T18:00:00Z"
+    }
+  ]
+}
