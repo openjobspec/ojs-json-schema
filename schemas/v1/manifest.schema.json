@@ -167,13 +167,65 @@
     },
     "extensions": {
       "title": "Extensions",
-      "description": "List of non-standard extensions supported by this implementation.",
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "default": [],
-      "examples": [[], ["x_redis_streams", "x_pg_notify"]]
+      "description": "Extensions supported by this implementation. May be a structured object (recommended) or a flat array of strings (legacy). The structured format organizes extensions by tier (official, experimental) with name, URI, and version.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "official": {
+              "title": "Official Extensions",
+              "description": "Official OJS extensions supported by this implementation. Each entry declares the extension name, URI, and implemented version.",
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/extension_entry"
+              },
+              "default": []
+            },
+            "experimental": {
+              "title": "Experimental Extensions",
+              "description": "Experimental OJS extensions supported by this implementation. Experimental extensions may change in breaking ways between versions.",
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/extension_entry"
+              },
+              "default": []
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Legacy format: flat array of extension name strings."
+        }
+      ],
+      "examples": [
+        {
+          "official": [
+            {
+              "name": "rate-limiting",
+              "uri": "urn:ojs:ext:rate-limiting",
+              "version": "1.0.0"
+            },
+            {
+              "name": "admin-api",
+              "uri": "urn:ojs:ext:admin-api",
+              "version": "1.0.0"
+            }
+          ],
+          "experimental": [
+            {
+              "name": "job-versioning",
+              "uri": "urn:ojs:ext:experimental:job-versioning",
+              "version": "0.1.0"
+            }
+          ]
+        },
+        [],
+        ["x_redis_streams", "x_pg_notify"]
+      ]
     },
     "endpoints": {
       "title": "Endpoints",
@@ -229,12 +281,56 @@
         "workflows": false,
         "pause_resume": false
       },
-      "extensions": [],
+      "extensions": {
+        "official": [
+          {
+            "name": "rate-limiting",
+            "uri": "urn:ojs:ext:rate-limiting",
+            "version": "1.0.0"
+          }
+        ],
+        "experimental": []
+      },
       "endpoints": {
         "base_url": "https://jobs.example.com/ojs/v1",
         "manifest": "/ojs/manifest",
         "health": "/ojs/v1/health"
       }
     }
-  ]
+  ],
+  "$defs": {
+    "extension_entry": {
+      "title": "Extension Entry",
+      "description": "Declares support for a specific OJS extension with its name, URI, and implemented version.",
+      "type": "object",
+      "required": ["name", "uri", "version"],
+      "properties": {
+        "name": {
+          "title": "Extension Name",
+          "description": "The extension name, matching the name segment of the URI (e.g., 'rate-limiting').",
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$",
+          "examples": ["rate-limiting", "admin-api", "job-versioning"]
+        },
+        "uri": {
+          "title": "Extension URI",
+          "description": "The full extension URN identifier (e.g., 'urn:ojs:ext:rate-limiting').",
+          "type": "string",
+          "pattern": "^urn:ojs:ext:(experimental:)?[a-z][a-z0-9]*(-[a-z0-9]+)*$",
+          "examples": [
+            "urn:ojs:ext:rate-limiting",
+            "urn:ojs:ext:admin-api",
+            "urn:ojs:ext:experimental:job-versioning"
+          ]
+        },
+        "version": {
+          "title": "Extension Version",
+          "description": "The SemVer version of the extension specification implemented.",
+          "type": "string",
+          "examples": ["1.0.0", "0.1.0"]
+        }
+      },
+      "additionalProperties": false
+    }
+  }
 }
