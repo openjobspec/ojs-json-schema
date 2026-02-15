@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openjobspec.org/schemas/v1/api-error.json",
+  "title": "OJS API Error",
+  "description": "Structured error object for OJS API error responses. Used across all protocol bindings (HTTP, gRPC, AMQP) for consistent error reporting. Defined by ojs-errors.md.",
+  "type": "object",
+  "required": ["code", "message"],
+  "properties": {
+    "code": {
+      "title": "Error Code",
+      "description": "A value from the canonical OJS error code taxonomy. MUST be SCREAMING_SNAKE_CASE.",
+      "type": "string",
+      "enum": [
+        "INVALID_PAYLOAD",
+        "INVALID_JOB_TYPE",
+        "INVALID_QUEUE",
+        "INVALID_ARGS",
+        "INVALID_METADATA",
+        "INVALID_STATE_TRANSITION",
+        "INVALID_RETRY_POLICY",
+        "INVALID_CRON_EXPRESSION",
+        "SCHEMA_VALIDATION_FAILED",
+        "DUPLICATE_JOB",
+        "JOB_ALREADY_COMPLETED",
+        "JOB_ALREADY_CANCELLED",
+        "UNAUTHENTICATED",
+        "PERMISSION_DENIED",
+        "TOKEN_EXPIRED",
+        "TENANT_ACCESS_DENIED",
+        "NOT_FOUND",
+        "QUEUE_PAUSED",
+        "QUEUE_FULL",
+        "RATE_LIMITED",
+        "PAYLOAD_TOO_LARGE",
+        "METADATA_TOO_LARGE",
+        "QUEUE_NAME_TOO_LONG",
+        "JOB_TYPE_TOO_LONG",
+        "CHECKSUM_MISMATCH",
+        "UNSUPPORTED_FEATURE",
+        "UNSUPPORTED_COMPRESSION",
+        "HANDLER_ERROR",
+        "HANDLER_TIMEOUT",
+        "HANDLER_PANIC",
+        "NON_RETRYABLE_ERROR",
+        "JOB_CANCELLED",
+        "BACKEND_ERROR",
+        "BACKEND_UNAVAILABLE",
+        "REPLICATION_LAG",
+        "BACKEND_TIMEOUT"
+      ],
+      "examples": ["INVALID_PAYLOAD", "HANDLER_ERROR", "NOT_FOUND", "RATE_LIMITED"]
+    },
+    "message": {
+      "title": "Error Message",
+      "description": "A human-readable description of the error. MUST be a non-empty string. MUST be in English. MAY be localized in addition.",
+      "type": "string",
+      "minLength": 1,
+      "examples": [
+        "Job type 'email.send' is not registered",
+        "Connection refused to smtp.example.com:587 after 30s timeout"
+      ]
+    },
+    "details": {
+      "title": "Error Details",
+      "description": "Structured context about the error. Contents are error-code-specific.",
+      "type": "object",
+      "additionalProperties": true,
+      "examples": [
+        {
+          "field": "type",
+          "value": "email.send",
+          "constraint": "must be a registered job type"
+        }
+      ]
+    },
+    "retryable": {
+      "title": "Retryable",
+      "description": "Whether the caller SHOULD retry the operation. When present, overrides the default retryability for the error category.",
+      "type": "boolean",
+      "examples": [true, false]
+    },
+    "doc_url": {
+      "title": "Documentation URL",
+      "description": "A URL pointing to documentation for this error code.",
+      "type": "string",
+      "format": "uri",
+      "examples": ["https://openjobspec.org/errors/INVALID_PAYLOAD"]
+    }
+  },
+  "additionalProperties": false,
+  "examples": [
+    {
+      "code": "INVALID_PAYLOAD",
+      "message": "Job type 'email.send' is not registered",
+      "details": {
+        "field": "type",
+        "value": "email.send",
+        "constraint": "must be a registered job type"
+      },
+      "retryable": false,
+      "doc_url": "https://openjobspec.org/errors/INVALID_PAYLOAD"
+    },
+    {
+      "code": "HANDLER_ERROR",
+      "message": "SMTP connection refused: Connection timed out after 10000ms",
+      "retryable": true
+    },
+    {
+      "code": "RATE_LIMITED",
+      "message": "Rate limit exceeded for queue 'email'",
+      "retryable": true,
+      "details": {
+        "queue": "email",
+        "limit": 100,
+        "window_ms": 60000
+      }
+    }
+  ]
+}

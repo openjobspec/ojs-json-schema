@@ -32,6 +32,7 @@
     "./retry-policy": "./schemas/v1/retry-policy.schema.json",
     "./unique-policy": "./schemas/v1/unique-policy.schema.json",
     "./error": "./schemas/v1/error.schema.json",
+    "./api-error": "./schemas/v1/api-error.schema.json",
     "./event": "./schemas/v1/event.schema.json",
     "./workflow": "./schemas/v1/workflow.schema.json",
     "./cron": "./schemas/v1/cron.schema.json",
