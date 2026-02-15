@@ -1,0 +1,50 @@
+{
+  "_description": "Job with error history (errors array) from multiple failed attempts",
+  "specversion": "1.0.0-rc.1",
+  "id": "019461a8-6f70-7182-9394-0e1f2a3b4c5d",
+  "type": "data.sync",
+  "queue": "default",
+  "args": ["source_db", "target_db", {"table": "users"}],
+  "meta": {},
+  "priority": 0,
+  "timeout": 600,
+  "retry": {
+    "max_attempts": 5,
+    "initial_interval": "PT1S",
+    "backoff_coefficient": 2.0,
+    "max_interval": "PT5M",
+    "jitter": true
+  },
+  "state": "retryable",
+  "attempt": 3,
+  "created_at": "2026-02-12T10:00:00.000Z",
+  "enqueued_at": "2026-02-12T10:00:00.000Z",
+  "started_at": "2026-02-12T10:05:00.000Z",
+  "error": {
+    "type": "ConnectionError",
+    "message": "Connection to target_db timed out after 60s"
+  },
+  "errors": [
+    {
+      "code": "HANDLER_ERROR",
+      "message": "SMTP connection refused on port 25",
+      "type": "SmtpConnectionError",
+      "attempt": 1,
+      "occurred_at": "2026-02-12T10:01:00.000Z"
+    },
+    {
+      "code": "HANDLER_TIMEOUT",
+      "message": "Handler exceeded 60s timeout",
+      "type": "TimeoutError",
+      "attempt": 2,
+      "occurred_at": "2026-02-12T10:03:00.000Z"
+    },
+    {
+      "code": "HANDLER_ERROR",
+      "message": "Connection to target_db timed out after 60s",
+      "type": "ConnectionError",
+      "attempt": 3,
+      "occurred_at": "2026-02-12T10:05:00.000Z"
+    }
+  ]
+}
