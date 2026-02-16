@@ -1,5 +1,9 @@
 # @openjobspec/schemas
 
+[![CI](https://github.com/openjobspec/ojs-json-schema/actions/workflows/ci.yml/badge.svg)](https://github.com/openjobspec/ojs-json-schema/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/@openjobspec/schemas.svg)](https://www.npmjs.com/package/@openjobspec/schemas)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+
 JSON Schema definitions for the [Open Job Spec (OJS)](https://openjobspec.org) v1.0.0-rc.1.
 
 This package provides machine-readable [JSON Schema (draft 2020-12)](https://json-schema.org/draft/2020-12/schema) definitions for all OJS data structures, enabling validation, code generation, and editor support across any programming language.
