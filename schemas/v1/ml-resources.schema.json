@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openjobspec.org/schemas/v1/ml-resources.json",
+  "title": "OJS ML/AI Resource Requirements",
+  "description": "Resource requirements for ML/AI workloads. These are declared in the job's meta.resources field and enable resource-aware scheduling. Backends that do not support resource matching MUST ignore these fields.",
+  "type": "object",
+  "properties": {
+    "gpu": {
+      "title": "GPU Requirements",
+      "description": "GPU compute requirements for the job.",
+      "type": "object",
+      "properties": {
+        "count": {
+          "title": "GPU Count",
+          "description": "Number of GPUs required. Default is 0 (no GPU needed).",
+          "type": "integer",
+          "minimum": 0,
+          "default": 0,
+          "examples": [0, 1, 2, 4, 8]
+        },
+        "type": {
+          "title": "GPU Type",
+          "description": "GPU model identifier. When specified, the job will only be dispatched to workers with matching GPU hardware.",
+          "type": "string",
+          "examples": ["nvidia-a100", "nvidia-h100", "nvidia-t4", "nvidia-l4", "nvidia-a10g"]
+        },
+        "memory_gb": {
+          "title": "GPU Memory (GB)",
+          "description": "Minimum GPU memory per device in gigabytes.",
+          "type": "number",
+          "minimum": 0,
+          "examples": [8, 16, 24, 40, 80]
+        }
+      },
+      "additionalProperties": false
+    },
+    "cpu": {
+      "title": "CPU Requirements",
+      "description": "CPU compute requirements for the job.",
+      "type": "object",
+      "properties": {
+        "cores": {
+          "title": "CPU Cores",
+          "description": "Minimum number of CPU cores required.",
+          "type": "integer",
+          "minimum": 1,
+          "examples": [1, 2, 4, 8, 16, 32]
+        }
+      },
+      "additionalProperties": false
+    },
+    "memory_gb": {
+      "title": "System Memory (GB)",
+      "description": "Minimum system memory in gigabytes.",
+      "type": "number",
+      "minimum": 0,
+      "examples": [1, 4, 16, 64, 256, 512]
+    },
+    "storage_gb": {
+      "title": "Scratch Storage (GB)",
+      "description": "Minimum scratch disk storage in gigabytes for temporary data.",
+      "type": "number",
+      "minimum": 0,
+      "examples": [10, 50, 100, 500, 1000]
+    }
+  },
+  "additionalProperties": false
+}
