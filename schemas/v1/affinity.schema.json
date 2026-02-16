@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openjobspec.org/schemas/v1/affinity.json",
+  "title": "OJS Affinity Rules",
+  "description": "Scheduling affinity rules for resource-aware job dispatch. Required rules are hard constraints; preferred rules are soft hints.",
+  "type": "object",
+  "properties": {
+    "required": {
+      "title": "Required Affinity Rules",
+      "description": "Hard constraints that MUST be satisfied. A job will not be dispatched to a worker that violates any required rule.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/affinity-rule" }
+    },
+    "preferred": {
+      "title": "Preferred Affinity Rules",
+      "description": "Soft constraints. The scheduler SHOULD prefer matching workers but MAY dispatch to non-matching workers if none are available.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/affinity-rule" }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "affinity-rule": {
+      "title": "Affinity Rule",
+      "type": "object",
+      "properties": {
+        "key": {
+          "title": "Label Key",
+          "description": "The worker label key to evaluate.",
+          "type": "string",
+          "examples": ["region", "gpu", "spot", "rack"]
+        },
+        "operator": {
+          "title": "Operator",
+          "description": "The comparison operator.",
+          "type": "string",
+          "enum": ["In", "NotIn", "Exists", "DoesNotExist"]
+        },
+        "values": {
+          "title": "Values",
+          "description": "Values to compare against. Required for In and NotIn operators.",
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["key", "operator"],
+      "additionalProperties": false
+    }
+  }
+}
