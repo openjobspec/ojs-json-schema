@@ -1,0 +1,404 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openjobspec.org/schema/extensions/ml-resources.json",
+  "title": "OJS ML Resource Requirements Extension",
+  "description": "Schema for AI/ML workload resource requirements in OJS jobs. Declares compute resources, accelerator constraints, model metadata, scheduling affinity, preemption policies, and checkpointing configuration. Backends that do not support ML resource matching MUST ignore ext_ml_* attributes.",
+  "type": "object",
+  "properties": {
+    "ext_ml_accelerator": {
+      "title": "Accelerator Type",
+      "type": "string",
+      "enum": ["gpu", "tpu", "fpga", "cpu"],
+      "description": "Required accelerator type. When 'gpu' or 'tpu', the backend MUST NOT dispatch to a CPU-only worker."
+    },
+    "ext_ml_gpu_type": {
+      "title": "GPU Type",
+      "type": "string",
+      "description": "GPU hardware model identifier. Implementations SHOULD recognize well-known identifiers and MAY accept custom identifiers following the {vendor}-{model} pattern.",
+      "examples": ["nvidia-a100", "nvidia-h100", "nvidia-h200", "nvidia-l4", "nvidia-l40s", "nvidia-t4", "nvidia-v100", "nvidia-a10g", "nvidia-b200", "amd-mi250", "amd-mi300x"]
+    },
+    "ext_ml_gpu_count": {
+      "title": "GPU Count",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 128,
+      "default": 1,
+      "description": "Number of GPUs required. Default is 1 when any GPU attribute is set."
+    },
+    "ext_ml_gpu_memory_gb": {
+      "title": "GPU VRAM (GB)",
+      "type": "number",
+      "minimum": 1,
+      "maximum": 640,
+      "description": "Minimum GPU VRAM per device in gigabytes. The backend MUST only dispatch to workers where every allocated GPU has at least this much VRAM."
+    },
+    "ext_ml_gpu_compute_capability": {
+      "title": "GPU Compute Capability",
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+$",
+      "description": "Minimum NVIDIA compute capability version (e.g., '8.0' for Ampere, '9.0' for Hopper). The backend MUST only dispatch to workers whose GPUs meet or exceed this version.",
+      "examples": ["7.0", "7.5", "8.0", "8.6", "8.9", "9.0", "10.0"]
+    },
+    "ext_ml_gpu_interconnect": {
+      "title": "GPU Interconnect",
+      "type": "string",
+      "enum": ["nvlink", "pcie", "any"],
+      "default": "any",
+      "description": "Required GPU interconnect type. 'nvlink' requires NVLink between all allocated GPUs (critical for tensor parallelism). 'pcie' accepts PCIe. 'any' has no preference."
+    },
+    "ext_ml_tpu_type": {
+      "title": "TPU Type",
+      "type": "string",
+      "enum": ["v4", "v5e", "v5p", "v6e"],
+      "description": "Google TPU version identifier."
+    },
+    "ext_ml_tpu_topology": {
+      "title": "TPU Topology",
+      "type": "string",
+      "pattern": "^\\d+x\\d+(x\\d+)?$",
+      "description": "TPU pod slice topology shape (e.g., '2x4', '4x4', '4x8'). The backend MUST allocate a contiguous pod slice of the specified shape.",
+      "examples": ["2x2", "2x4", "4x4", "4x8", "8x8"]
+    },
+    "ext_ml_tpu_chip_count": {
+      "title": "TPU Chip Count",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1024,
+      "description": "Number of TPU chips required."
+    },
+    "ext_ml_memory_gb": {
+      "title": "System Memory (GB)",
+      "type": "number",
+      "minimum": 0.5,
+      "maximum": 8192,
+      "description": "Minimum system (host) memory in gigabytes, independent of GPU VRAM."
+    },
+    "ext_ml_storage_gb": {
+      "title": "Scratch Storage (GB)",
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100000,
+      "description": "Minimum scratch disk storage in gigabytes."
+    },
+    "ext_ml_shm_size_gb": {
+      "title": "Shared Memory (GB)",
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1024,
+      "description": "Minimum shared memory (/dev/shm) size in gigabytes. Critical for PyTorch DataLoader with num_workers > 0 in containerized environments."
+    },
+    "ext_ml_cpu_cores": {
+      "title": "CPU Cores",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1024,
+      "description": "Minimum number of CPU cores required."
+    },
+    "ext_ml_model_id": {
+      "title": "Model Identifier",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "description": "Human-readable model identifier. Used for routing jobs to workers with the model loaded.",
+      "examples": ["llama-3.1-70b", "stable-diffusion-xl", "whisper-large-v3", "resnet50"]
+    },
+    "ext_ml_model_version": {
+      "title": "Model Version",
+      "type": "string",
+      "maxLength": 128,
+      "description": "Specific model version or tag. Semantic versioning is RECOMMENDED.",
+      "examples": ["1.0.0", "v2.1", "2.1.0-beta", "3.0.0+cu121"]
+    },
+    "ext_ml_model_provider": {
+      "title": "Model Provider",
+      "type": "string",
+      "enum": ["openai", "anthropic", "google", "huggingface", "replicate", "local", "custom"],
+      "description": "Model provider or registry source."
+    },
+    "ext_ml_model_checksum": {
+      "title": "Model Checksum",
+      "type": "string",
+      "pattern": "^[a-z0-9]+:[a-f0-9]+$",
+      "description": "Integrity checksum for model weights. Format: {algorithm}:{hex-digest}.",
+      "examples": ["sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"]
+    },
+    "ext_ml_model_format": {
+      "title": "Model Format",
+      "type": "string",
+      "enum": ["safetensors", "gguf", "onnx", "torchscript", "savedmodel", "custom"],
+      "description": "Serialization format of the model weights. Determines which runtime can load the model."
+    },
+    "ext_ml_max_tokens": {
+      "title": "Max Tokens",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 10000000,
+      "description": "Maximum tokens for generation tasks."
+    },
+    "ext_ml_max_batch_size": {
+      "title": "Max Batch Size",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100000,
+      "description": "Maximum batch size for inference."
+    },
+    "ext_ml_timeout_seconds": {
+      "title": "ML Timeout (seconds)",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 604800,
+      "description": "ML-specific timeout in seconds. Overrides the standard job timeout. Maximum 7 days."
+    },
+    "ext_ml_runtime": {
+      "title": "ML Runtime",
+      "type": "string",
+      "enum": ["pytorch", "tensorflow", "onnx", "triton", "vllm", "tgi", "custom"],
+      "description": "ML runtime or framework required to execute the job."
+    },
+    "ext_ml_precision": {
+      "title": "Compute Precision",
+      "type": "string",
+      "enum": ["fp32", "fp16", "bf16", "fp8", "int8", "int4"],
+      "description": "Numerical precision for model computation. Affects performance, memory usage, and minimum compute capability."
+    },
+    "ext_ml_distributed_strategy": {
+      "title": "Distributed Strategy",
+      "type": "string",
+      "enum": ["none", "data_parallel", "tensor_parallel", "pipeline_parallel", "fsdp", "deepspeed"],
+      "description": "Parallelism strategy for multi-GPU/multi-node execution."
+    },
+    "ext_ml_priority_class": {
+      "title": "Priority Class",
+      "type": "string",
+      "enum": ["spot", "on-demand", "reserved"],
+      "description": "Resource priority class. Determines preemption behavior and cost tier."
+    },
+    "ext_ml_preemptible": {
+      "title": "Preemptible",
+      "type": "boolean",
+      "description": "Whether this job can be preempted by higher-priority jobs."
+    },
+    "ext_ml_preemption_grace_period_s": {
+      "title": "Preemption Grace Period (seconds)",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 3600,
+      "default": 30,
+      "description": "Seconds of warning before forcible preemption."
+    },
+    "ext_ml_checkpoint_on_preempt": {
+      "title": "Checkpoint on Preempt",
+      "type": "boolean",
+      "default": false,
+      "description": "Whether to save a checkpoint during the preemption grace period."
+    },
+    "ext_ml_checkpoint_enabled": {
+      "title": "Checkpointing Enabled",
+      "type": "boolean",
+      "default": false,
+      "description": "Whether periodic checkpointing is enabled."
+    },
+    "ext_ml_checkpoint_interval_s": {
+      "title": "Checkpoint Interval (seconds)",
+      "type": "integer",
+      "minimum": 10,
+      "maximum": 86400,
+      "default": 300,
+      "description": "Interval between periodic checkpoints in seconds."
+    },
+    "ext_ml_checkpoint_storage_uri": {
+      "title": "Checkpoint Storage URI",
+      "type": "string",
+      "format": "uri",
+      "description": "URI prefix for checkpoint storage (e.g., 's3://bucket/checkpoints/', 'gs://bucket/checkpoints/')."
+    },
+    "ext_ml_checkpoint_max_count": {
+      "title": "Max Checkpoints",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100,
+      "default": 3,
+      "description": "Maximum checkpoints to retain. Oldest checkpoints are evicted first (FIFO)."
+    },
+    "ext_ml_reservation_id": {
+      "title": "Resource Reservation ID",
+      "type": "string",
+      "description": "Identifier of a pre-allocated resource reservation."
+    },
+    "ext_ml_reservation_timeout_s": {
+      "title": "Reservation Timeout (seconds)",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 86400,
+      "description": "Maximum seconds a resource reservation is held before automatic release."
+    },
+    "ext_ml_node_selector": {
+      "title": "Node Selector",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Key-value map of labels that a worker node MUST match for job placement. All keys must match (AND semantics).",
+      "examples": [
+        {"gpu_type": "nvidia-a100", "region": "us-east-1"},
+        {"cluster": "ml-training-prod", "instance_type": "p5.48xlarge"}
+      ]
+    },
+    "ext_ml_affinity": {
+      "title": "Scheduling Affinity",
+      "type": "object",
+      "description": "Scheduling affinity rules with required (hard) and preferred (soft) constraints.",
+      "properties": {
+        "required": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/affinityRule" },
+          "description": "Hard constraints. The backend MUST NOT dispatch to a worker that violates any required rule."
+        },
+        "preferred": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/weightedAffinityRule" },
+          "description": "Soft constraints. The backend SHOULD prefer workers satisfying these rules."
+        }
+      },
+      "additionalProperties": false
+    },
+    "ext_ml_anti_affinity": {
+      "title": "Scheduling Anti-Affinity",
+      "type": "object",
+      "description": "Anti-affinity rules to prevent co-location of specific jobs on the same worker.",
+      "properties": {
+        "required": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/affinityRule" },
+          "description": "Hard anti-affinity constraints."
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "affinityOperator": {
+      "type": "string",
+      "enum": ["In", "NotIn", "Exists", "DoesNotExist", "Gt", "Gte", "Lt", "Lte"],
+      "description": "Comparison operator for affinity rule matching."
+    },
+    "affinityRule": {
+      "type": "object",
+      "required": ["key", "operator"],
+      "properties": {
+        "key": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Worker label key to match against."
+        },
+        "operator": { "$ref": "#/$defs/affinityOperator" },
+        "values": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Values to match. Required for In, NotIn, Gt, Gte, Lt, Lte operators."
+        }
+      },
+      "additionalProperties": false
+    },
+    "weightedAffinityRule": {
+      "type": "object",
+      "required": ["key", "operator"],
+      "properties": {
+        "key": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Worker label key to match against."
+        },
+        "operator": { "$ref": "#/$defs/affinityOperator" },
+        "values": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Values to match."
+        },
+        "weight": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 50,
+          "description": "Preference weight (0-100). Higher weight means stronger preference."
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "examples": [
+    {
+      "ext_ml_accelerator": "gpu",
+      "ext_ml_gpu_type": "nvidia-a100",
+      "ext_ml_gpu_count": 2,
+      "ext_ml_gpu_memory_gb": 80,
+      "ext_ml_gpu_compute_capability": "8.0",
+      "ext_ml_memory_gb": 256,
+      "ext_ml_cpu_cores": 16,
+      "ext_ml_model_id": "llama-3.1-70b",
+      "ext_ml_model_version": "v2.1",
+      "ext_ml_model_provider": "huggingface",
+      "ext_ml_model_format": "safetensors",
+      "ext_ml_runtime": "vllm",
+      "ext_ml_precision": "fp16",
+      "ext_ml_max_tokens": 4096,
+      "ext_ml_priority_class": "on-demand"
+    },
+    {
+      "ext_ml_accelerator": "gpu",
+      "ext_ml_gpu_type": "nvidia-h100",
+      "ext_ml_gpu_count": 8,
+      "ext_ml_gpu_memory_gb": 80,
+      "ext_ml_gpu_compute_capability": "9.0",
+      "ext_ml_gpu_interconnect": "nvlink",
+      "ext_ml_memory_gb": 1024,
+      "ext_ml_model_id": "llama-3.1-70b",
+      "ext_ml_runtime": "pytorch",
+      "ext_ml_precision": "bf16",
+      "ext_ml_distributed_strategy": "fsdp",
+      "ext_ml_priority_class": "reserved",
+      "ext_ml_checkpoint_enabled": true,
+      "ext_ml_checkpoint_interval_s": 600,
+      "ext_ml_checkpoint_storage_uri": "s3://checkpoints/train-70b/",
+      "ext_ml_checkpoint_max_count": 5,
+      "ext_ml_node_selector": {
+        "cluster": "ml-training-prod",
+        "instance_type": "p5.48xlarge"
+      }
+    },
+    {
+      "ext_ml_accelerator": "tpu",
+      "ext_ml_tpu_type": "v5e",
+      "ext_ml_tpu_topology": "4x4",
+      "ext_ml_tpu_chip_count": 16,
+      "ext_ml_memory_gb": 256,
+      "ext_ml_model_id": "t5-xxl",
+      "ext_ml_runtime": "tensorflow",
+      "ext_ml_precision": "bf16",
+      "ext_ml_priority_class": "reserved"
+    },
+    {
+      "ext_ml_accelerator": "cpu",
+      "ext_ml_cpu_cores": 4,
+      "ext_ml_memory_gb": 8,
+      "ext_ml_model_id": "distilbert-base",
+      "ext_ml_model_version": "v1.2",
+      "ext_ml_model_format": "onnx",
+      "ext_ml_runtime": "onnx",
+      "ext_ml_priority_class": "on-demand"
+    },
+    {
+      "ext_ml_accelerator": "gpu",
+      "ext_ml_gpu_type": "nvidia-a100",
+      "ext_ml_gpu_count": 4,
+      "ext_ml_gpu_memory_gb": 40,
+      "ext_ml_priority_class": "spot",
+      "ext_ml_preemptible": true,
+      "ext_ml_preemption_grace_period_s": 60,
+      "ext_ml_checkpoint_on_preempt": true,
+      "ext_ml_checkpoint_enabled": true,
+      "ext_ml_checkpoint_interval_s": 300,
+      "ext_ml_checkpoint_storage_uri": "s3://checkpoints/sweep/"
+    }
+  ]
+}
