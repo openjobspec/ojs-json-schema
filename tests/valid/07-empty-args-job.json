@@ -1,6 +1,6 @@
 {
   "_description": "Valid job with empty args array (no arguments needed)",
-  "specversion": "1.0.0-rc.1",
+  "specversion": "1.0",
   "id": "019461a8-7081-7293-e4a5-1f2a3b4c5d6e",
   "type": "cache.warmup",
   "queue": "default",

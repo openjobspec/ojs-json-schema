@@ -1,6 +1,6 @@
 {
   "_description": "Job that has been executed and completed with a result",
-  "specversion": "1.0.0-rc.1",
+  "specversion": "1.0",
   "id": "019461a8-3c4d-7e5f-a061-7b8c9d0e1f2a",
   "type": "email.send",
   "queue": "email",

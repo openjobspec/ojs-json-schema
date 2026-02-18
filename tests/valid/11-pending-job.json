@@ -1,6 +1,6 @@
 {
   "_description": "Job in pending state (staged, awaiting external activation)",
-  "specversion": "1.0.0-rc.1",
+  "specversion": "1.0",
   "id": "019461a8-b4c5-76d7-e8f9-5d6e7f809102",
   "type": "order.fulfill",
   "queue": "fulfillment",

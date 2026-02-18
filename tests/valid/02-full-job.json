@@ -1,6 +1,6 @@
 {
   "_description": "Full job envelope with all optional attributes",
-  "specversion": "1.0.0-rc.1",
+  "specversion": "1.0",
   "id": "019461a8-2b3c-7d4e-9f50-6a7b8c9d0e1f",
   "type": "report.generate",
   "queue": "reports",

@@ -1,6 +1,6 @@
 {
   "_description": "Job with error history (errors array) from multiple failed attempts",
-  "specversion": "1.0.0-rc.1",
+  "specversion": "1.0",
   "id": "019461a8-6f70-7182-9394-0e1f2a3b4c5d",
   "type": "data.sync",
   "queue": "default",

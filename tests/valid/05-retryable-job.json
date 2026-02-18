@@ -1,6 +1,6 @@
 {
   "_description": "Job that failed on second attempt and is waiting to retry",
-  "specversion": "1.0.0-rc.1",
+  "specversion": "1.0",
   "id": "019461a8-4d5e-7f60-b172-8c9d0e1f2a3b",
   "type": "data.sync",
   "queue": "default",

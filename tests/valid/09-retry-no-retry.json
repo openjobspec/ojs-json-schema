@@ -1,6 +1,6 @@
 {
   "_description": "Job with retry disabled (max_attempts: 0) and dead letter on exhaustion",
-  "specversion": "1.0.0-rc.1",
+  "specversion": "1.0",
   "id": "019461a8-92a3-74b5-c6d7-3b4c5d6e7f80",
   "type": "analytics.track",
   "queue": "analytics",
