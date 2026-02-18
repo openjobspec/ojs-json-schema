@@ -1,0 +1,387 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openjobspec.org/schema/extensions/ml-extensions.json",
+  "title": "OJS ML/AI Pipeline Extensions",
+  "description": "Schema for ML pipeline semantics in OJS jobs: model metadata, training hyperparameters, inference configuration, data preprocessing, evaluation metrics, and artifact management. Complements the ML Resources extension (ext_ml_*) with workflow-level ML attributes (ext_mlx_*).",
+  "type": "object",
+  "properties": {
+    "ext_mlx_model_name": {
+      "title": "Model Name",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "description": "Human-readable model name.",
+      "examples": ["resnet50-imagenet", "llama-3.1-8b-custom", "customer-intent-classifier"]
+    },
+    "ext_mlx_model_version": {
+      "title": "Model Version",
+      "type": "string",
+      "maxLength": 128,
+      "description": "Semantic version of the model artifact.",
+      "examples": ["1.0.0", "2.1.0-beta", "3.0.0"]
+    },
+    "ext_mlx_model_framework": {
+      "title": "ML Framework",
+      "type": "string",
+      "enum": ["pytorch", "tensorflow", "onnx", "jax", "sklearn", "xgboost", "custom"],
+      "description": "ML framework required to load and execute the model."
+    },
+    "ext_mlx_model_input_schema": {
+      "title": "Model Input Schema",
+      "type": "object",
+      "description": "JSON Schema describing expected model input format."
+    },
+    "ext_mlx_model_output_schema": {
+      "title": "Model Output Schema",
+      "type": "object",
+      "description": "JSON Schema describing expected model output format."
+    },
+    "ext_mlx_experiment_id": {
+      "title": "Experiment ID",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "description": "Experiment tracker ID (e.g., MLflow experiment ID).",
+      "examples": ["exp-llama-finetune-2024", "exp-image-classification"]
+    },
+    "ext_mlx_run_id": {
+      "title": "Run ID",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "description": "Experiment run ID within the experiment.",
+      "examples": ["run-001", "run-abc-123"]
+    },
+    "ext_mlx_training_dataset_uri": {
+      "title": "Training Dataset URI",
+      "type": "string",
+      "format": "uri",
+      "description": "URI of the training dataset.",
+      "examples": ["s3://datasets/train.parquet", "gs://data/train/"]
+    },
+    "ext_mlx_training_validation_uri": {
+      "title": "Validation Dataset URI",
+      "type": "string",
+      "format": "uri",
+      "description": "URI of the validation dataset."
+    },
+    "ext_mlx_training_hyperparameters": {
+      "title": "Hyperparameters",
+      "type": "object",
+      "description": "Key-value map of training hyperparameters. Backends MUST preserve these exactly as provided.",
+      "examples": [
+        {
+          "learning_rate": 2e-5,
+          "batch_size": 32,
+          "epochs": 3,
+          "weight_decay": 0.01,
+          "warmup_steps": 500,
+          "seed": 42
+        }
+      ]
+    },
+    "ext_mlx_training_epochs": {
+      "title": "Training Epochs",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100000,
+      "description": "Number of training epochs."
+    },
+    "ext_mlx_training_checkpoint_uri": {
+      "title": "Training Checkpoint URI",
+      "type": "string",
+      "format": "uri",
+      "description": "URI for saving training checkpoints."
+    },
+    "ext_mlx_training_resume_from": {
+      "title": "Resume From Checkpoint",
+      "type": "string",
+      "format": "uri",
+      "description": "URI of a checkpoint to resume training from."
+    },
+    "ext_mlx_training_output_model_uri": {
+      "title": "Output Model URI",
+      "type": "string",
+      "format": "uri",
+      "description": "URI where the trained model artifact will be saved."
+    },
+    "ext_mlx_inference_model_uri": {
+      "title": "Inference Model URI",
+      "type": "string",
+      "format": "uri",
+      "description": "URI of the model artifact to load for inference.",
+      "examples": ["s3://models/classifier/v1.0.0/model.safetensors"]
+    },
+    "ext_mlx_inference_batch_size": {
+      "title": "Inference Batch Size",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100000,
+      "description": "Number of inputs to process per inference batch."
+    },
+    "ext_mlx_inference_timeout_ms": {
+      "title": "Inference Timeout (ms)",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 3600000,
+      "description": "Per-request inference timeout in milliseconds."
+    },
+    "ext_mlx_inference_input_uri": {
+      "title": "Inference Input URI",
+      "type": "string",
+      "format": "uri",
+      "description": "URI of the input data for batch inference."
+    },
+    "ext_mlx_inference_output_uri": {
+      "title": "Inference Output URI",
+      "type": "string",
+      "format": "uri",
+      "description": "URI where inference results will be written."
+    },
+    "ext_mlx_inference_mode": {
+      "title": "Inference Mode",
+      "type": "string",
+      "enum": ["batch", "streaming", "realtime"],
+      "description": "Inference execution mode."
+    },
+    "ext_mlx_preprocess_input_uri": {
+      "title": "Preprocessing Input URI",
+      "type": "string",
+      "format": "uri",
+      "description": "URI of the raw input data for preprocessing."
+    },
+    "ext_mlx_preprocess_output_uri": {
+      "title": "Preprocessing Output URI",
+      "type": "string",
+      "format": "uri",
+      "description": "URI where processed data will be written."
+    },
+    "ext_mlx_preprocess_input_format": {
+      "title": "Input Data Format",
+      "type": "string",
+      "enum": ["csv", "parquet", "json", "jsonl", "tfrecord", "arrow", "custom"],
+      "description": "Format of the input data."
+    },
+    "ext_mlx_preprocess_output_format": {
+      "title": "Output Data Format",
+      "type": "string",
+      "enum": ["csv", "parquet", "json", "jsonl", "tfrecord", "arrow", "custom"],
+      "description": "Format of the output data."
+    },
+    "ext_mlx_preprocess_transformations": {
+      "title": "Transformations",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["type"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["tokenize", "normalize", "augment", "filter", "sample", "deduplicate", "encode"],
+            "description": "Transformation type."
+          },
+          "config": {
+            "type": "object",
+            "description": "Transformation-specific configuration."
+          }
+        },
+        "additionalProperties": false
+      },
+      "description": "Ordered list of data transformations to apply."
+    },
+    "ext_mlx_preprocess_split_ratios": {
+      "title": "Split Ratios",
+      "type": "object",
+      "properties": {
+        "train": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Fraction of data for the training set."
+        },
+        "validation": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Fraction of data for the validation set."
+        },
+        "test": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Fraction of data for the test set."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Train/validation/test split ratios. Values MUST sum to 1.0."
+    },
+    "ext_mlx_eval_dataset_uri": {
+      "title": "Evaluation Dataset URI",
+      "type": "string",
+      "format": "uri",
+      "description": "URI of the evaluation dataset."
+    },
+    "ext_mlx_eval_model_uri": {
+      "title": "Evaluation Model URI",
+      "type": "string",
+      "format": "uri",
+      "description": "URI of the model to evaluate."
+    },
+    "ext_mlx_eval_metrics": {
+      "title": "Evaluation Metrics",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of metrics to compute during evaluation.",
+      "examples": [["accuracy", "f1", "precision", "recall", "latency_p99"]]
+    },
+    "ext_mlx_eval_thresholds": {
+      "title": "Evaluation Thresholds",
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "min": {
+            "type": "number",
+            "description": "Minimum acceptable value for this metric."
+          },
+          "max": {
+            "type": "number",
+            "description": "Maximum acceptable value for this metric."
+          }
+        },
+        "additionalProperties": false
+      },
+      "description": "Map of metric names to threshold objects with min/max values.",
+      "examples": [
+        {
+          "accuracy": { "min": 0.92 },
+          "f1": { "min": 0.88 },
+          "latency_p99": { "max": 100 }
+        }
+      ]
+    },
+    "ext_mlx_eval_output_uri": {
+      "title": "Evaluation Output URI",
+      "type": "string",
+      "format": "uri",
+      "description": "URI where evaluation results will be written."
+    },
+    "ext_mlx_eval_baseline_run_id": {
+      "title": "Baseline Run ID",
+      "type": "string",
+      "maxLength": 256,
+      "description": "Run ID of a baseline model for comparison."
+    },
+    "ext_mlx_artifact_model_uri": {
+      "title": "Model Artifact URI",
+      "type": "string",
+      "format": "uri",
+      "description": "Primary model artifact URI."
+    },
+    "ext_mlx_artifact_dataset_uri": {
+      "title": "Dataset Artifact URI",
+      "type": "string",
+      "format": "uri",
+      "description": "Primary dataset URI."
+    },
+    "ext_mlx_artifact_checkpoint_uri": {
+      "title": "Checkpoint Artifact URI",
+      "type": "string",
+      "format": "uri",
+      "description": "Checkpoint artifact URI."
+    },
+    "ext_mlx_artifact_output_uri": {
+      "title": "Output Artifact URI",
+      "type": "string",
+      "format": "uri",
+      "description": "Primary output artifact URI."
+    },
+    "ext_mlx_artifact_registry": {
+      "title": "Artifact Registry",
+      "type": "string",
+      "enum": ["s3", "gcs", "azure_blob", "mlflow", "wandb", "huggingface", "local"],
+      "description": "Artifact storage backend or registry."
+    },
+    "ext_mlx_scheduling_gpu_affinity": {
+      "title": "GPU Affinity Hint",
+      "type": "string",
+      "enum": ["spread", "pack", "dedicated"],
+      "description": "GPU allocation strategy hint: 'spread' across nodes, 'pack' onto fewest nodes, 'dedicated' exclusive access."
+    },
+    "ext_mlx_scheduling_preemption_policy": {
+      "title": "Preemption Policy",
+      "type": "string",
+      "enum": ["never", "save_and_retry", "immediate"],
+      "description": "Preemption behavior preference."
+    },
+    "ext_mlx_scheduling_spot_preference": {
+      "title": "Spot Preference",
+      "type": "string",
+      "enum": ["spot_preferred", "on_demand_only", "any"],
+      "description": "Preference for spot vs on-demand instances."
+    },
+    "ext_mlx_scheduling_data_locality": {
+      "title": "Data Locality Hint",
+      "type": "string",
+      "format": "uri",
+      "description": "URI hint for data-local scheduling. The backend SHOULD prefer workers co-located with this data."
+    }
+  },
+  "examples": [
+    {
+      "ext_mlx_model_name": "llama-3.1-8b-classifier",
+      "ext_mlx_model_version": "1.0.0",
+      "ext_mlx_model_framework": "pytorch",
+      "ext_mlx_training_dataset_uri": "s3://datasets/customer-support-v3/train.parquet",
+      "ext_mlx_training_validation_uri": "s3://datasets/customer-support-v3/val.parquet",
+      "ext_mlx_training_hyperparameters": {
+        "learning_rate": 2e-5,
+        "batch_size": 32,
+        "weight_decay": 0.01,
+        "warmup_steps": 500,
+        "seed": 42
+      },
+      "ext_mlx_training_epochs": 3,
+      "ext_mlx_training_output_model_uri": "s3://models/classifier/v1.0.0/",
+      "ext_mlx_experiment_id": "exp-llama-finetune-2024",
+      "ext_mlx_run_id": "run-001"
+    },
+    {
+      "ext_mlx_model_name": "customer-intent-classifier",
+      "ext_mlx_model_version": "3.1.0",
+      "ext_mlx_model_framework": "onnx",
+      "ext_mlx_inference_model_uri": "s3://models/intent-classifier/v3.1.0/model.onnx",
+      "ext_mlx_inference_batch_size": 256,
+      "ext_mlx_inference_timeout_ms": 30000,
+      "ext_mlx_inference_input_uri": "s3://data/daily-tickets/2024-01-15.jsonl",
+      "ext_mlx_inference_output_uri": "s3://data/daily-predictions/2024-01-15.jsonl",
+      "ext_mlx_inference_mode": "batch"
+    },
+    {
+      "ext_mlx_preprocess_input_uri": "s3://raw-data/customer-tickets-2024.jsonl",
+      "ext_mlx_preprocess_output_uri": "s3://processed/customer-tickets-v3/",
+      "ext_mlx_preprocess_input_format": "jsonl",
+      "ext_mlx_preprocess_output_format": "parquet",
+      "ext_mlx_preprocess_transformations": [
+        { "type": "filter", "config": { "column": "language", "value": "en" } },
+        { "type": "deduplicate", "config": { "columns": ["text"] } },
+        { "type": "tokenize", "config": { "tokenizer": "meta-llama/Llama-3.1-8B" } }
+      ],
+      "ext_mlx_preprocess_split_ratios": { "train": 0.8, "validation": 0.1, "test": 0.1 }
+    },
+    {
+      "ext_mlx_model_name": "llama-3.1-8b-classifier",
+      "ext_mlx_model_version": "1.0.0",
+      "ext_mlx_eval_dataset_uri": "s3://datasets/customer-support-v3/test.parquet",
+      "ext_mlx_eval_model_uri": "s3://models/classifier/v1.0.0/",
+      "ext_mlx_eval_metrics": ["accuracy", "f1", "precision", "recall"],
+      "ext_mlx_eval_thresholds": {
+        "accuracy": { "min": 0.92 },
+        "f1": { "min": 0.88 }
+      },
+      "ext_mlx_eval_output_uri": "s3://eval-results/classifier/v1.0.0/"
+    }
+  ]
+}
