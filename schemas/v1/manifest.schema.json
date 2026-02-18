@@ -17,7 +17,7 @@
       "title": "OJS Version",
       "description": "OJS specification version implemented by this server.",
       "type": "string",
-      "examples": ["1.0.0-rc.1"]
+      "examples": ["1.0"]
     },
     "implementation": {
       "title": "Implementation Details",
@@ -258,7 +258,7 @@
   "additionalProperties": true,
   "examples": [
     {
-      "ojs_version": "1.0.0-rc.1",
+      "ojs_version": "1.0",
       "implementation": {
         "name": "ojs-redis",
         "version": "1.0.0",
