@@ -49,10 +49,12 @@
     "./http/nack-request": "./schemas/v1/http/nack-request.schema.json",
     "./http/heartbeat-request": "./schemas/v1/http/heartbeat-request.schema.json",
     "./http/heartbeat-response": "./schemas/v1/http/heartbeat-response.schema.json",
+    "./extensions/ml-resources": "./extensions/ml-resources.json",
     "./schemas/*": "./schemas/*"
   },
   "files": [
     "schemas/",
+    "extensions/",
     "tests/",
     "README.md",
     "LICENSE"
