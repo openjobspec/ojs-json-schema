@@ -1,6 +1,6 @@
 {
   "_reason": "INVALID: Missing required 'id' field",
-  "specversion": "1.0.0-rc.1",
+  "specversion": "1.0",
   "type": "email.send",
   "queue": "default",
   "args": ["user@example.com", "welcome"]

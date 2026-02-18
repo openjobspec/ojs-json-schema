@@ -1,6 +1,6 @@
 {
   "_reason": "INVALID: 'queue' MUST match pattern [a-z0-9][a-z0-9\\-\\.]*. Uppercase letters and spaces are not allowed.",
-  "specversion": "1.0.0-rc.1",
+  "specversion": "1.0",
   "id": "019461a8-1a2b-7c3d-8e4f-5a6b7c8d9e0f",
   "type": "email.send",
   "queue": "My Email Queue",
