@@ -22,14 +22,56 @@
           "title": "GPU Type",
           "description": "GPU model identifier. When specified, the job will only be dispatched to workers with matching GPU hardware.",
           "type": "string",
-          "examples": ["nvidia-a100", "nvidia-h100", "nvidia-t4", "nvidia-l4", "nvidia-a10g"]
+          "examples": ["nvidia-a100", "nvidia-h100", "nvidia-h200", "nvidia-t4", "nvidia-l4", "nvidia-l40s", "nvidia-a10g", "nvidia-b200", "amd-mi250", "amd-mi300x"]
         },
         "memory_gb": {
-          "title": "GPU Memory (GB)",
-          "description": "Minimum GPU memory per device in gigabytes.",
+          "title": "GPU VRAM (GB)",
+          "description": "Minimum GPU VRAM per device in gigabytes.",
           "type": "number",
           "minimum": 0,
-          "examples": [8, 16, 24, 40, 80]
+          "examples": [8, 16, 24, 40, 48, 80, 141, 192]
+        },
+        "compute_capability": {
+          "title": "Compute Capability",
+          "description": "Minimum NVIDIA compute capability version (e.g., '8.0' for Ampere, '9.0' for Hopper).",
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+$",
+          "examples": ["7.0", "7.5", "8.0", "8.6", "8.9", "9.0", "10.0"]
+        },
+        "interconnect": {
+          "title": "GPU Interconnect",
+          "description": "Required interconnect between GPU devices: 'nvlink' for high-bandwidth tensor parallelism, 'pcie' for data parallelism, 'any' for no preference.",
+          "type": "string",
+          "enum": ["nvlink", "pcie", "any"],
+          "default": "any"
+        }
+      },
+      "additionalProperties": false
+    },
+    "tpu": {
+      "title": "TPU Requirements",
+      "description": "TPU compute requirements for the job.",
+      "type": "object",
+      "properties": {
+        "type": {
+          "title": "TPU Type",
+          "description": "Google TPU version identifier.",
+          "type": "string",
+          "enum": ["v4", "v5e", "v5p", "v6e"]
+        },
+        "topology": {
+          "title": "TPU Topology",
+          "description": "TPU pod slice topology shape (e.g., '2x4', '4x4'). Must be a contiguous allocation.",
+          "type": "string",
+          "pattern": "^\\d+x\\d+(x\\d+)?$",
+          "examples": ["2x2", "2x4", "4x4", "4x8"]
+        },
+        "chip_count": {
+          "title": "TPU Chip Count",
+          "description": "Number of TPU chips required.",
+          "type": "integer",
+          "minimum": 1,
+          "examples": [4, 8, 16, 32, 64]
         }
       },
       "additionalProperties": false
@@ -44,24 +86,190 @@
           "description": "Minimum number of CPU cores required.",
           "type": "integer",
           "minimum": 1,
-          "examples": [1, 2, 4, 8, 16, 32]
+          "examples": [1, 2, 4, 8, 16, 32, 96]
         }
       },
       "additionalProperties": false
     },
     "memory_gb": {
       "title": "System Memory (GB)",
-      "description": "Minimum system memory in gigabytes.",
+      "description": "Minimum system (host) memory in gigabytes.",
       "type": "number",
       "minimum": 0,
-      "examples": [1, 4, 16, 64, 256, 512]
+      "examples": [1, 4, 16, 64, 128, 256, 512, 1024]
     },
     "storage_gb": {
       "title": "Scratch Storage (GB)",
       "description": "Minimum scratch disk storage in gigabytes for temporary data.",
       "type": "number",
       "minimum": 0,
-      "examples": [10, 50, 100, 500, 1000]
+      "examples": [10, 50, 100, 500, 1000, 2000]
+    },
+    "shm_size_gb": {
+      "title": "Shared Memory (GB)",
+      "description": "Minimum /dev/shm size in gigabytes. Critical for PyTorch DataLoader with multiprocessing in containerized environments.",
+      "type": "number",
+      "minimum": 0,
+      "examples": [1, 4, 16, 64, 256]
+    },
+    "model": {
+      "title": "Model Reference",
+      "description": "Reference to the ML model artifact required for this job.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "title": "Model Name",
+          "description": "Human-readable model identifier.",
+          "type": "string",
+          "minLength": 1,
+          "examples": ["llama-3.1-70b", "stable-diffusion-xl", "whisper-large-v3"]
+        },
+        "version": {
+          "title": "Model Version",
+          "description": "Model version string.",
+          "type": "string",
+          "examples": ["1.0.0", "v2.1", "2.1.0-beta"]
+        },
+        "registry": {
+          "title": "Model Registry",
+          "description": "Model registry source (e.g., 'huggingface', 'local').",
+          "type": "string"
+        },
+        "checksum": {
+          "title": "Model Checksum",
+          "description": "Integrity checksum in {algorithm}:{hex-digest} format.",
+          "type": "string",
+          "pattern": "^[a-z0-9]+:[a-f0-9]+$"
+        },
+        "format": {
+          "title": "Model Format",
+          "description": "Serialization format of the model weights.",
+          "type": "string",
+          "enum": ["safetensors", "gguf", "onnx", "torchscript", "savedmodel", "custom"]
+        }
+      },
+      "required": ["name"],
+      "additionalProperties": false
+    },
+    "runtime": {
+      "title": "ML Runtime",
+      "description": "ML runtime or framework required to execute the job.",
+      "type": "string",
+      "enum": ["pytorch", "tensorflow", "onnx", "triton", "vllm", "tgi", "custom"]
+    },
+    "precision": {
+      "title": "Compute Precision",
+      "description": "Numerical precision for model computation.",
+      "type": "string",
+      "enum": ["fp32", "fp16", "bf16", "fp8", "int8", "int4"]
+    },
+    "distributed_strategy": {
+      "title": "Distributed Strategy",
+      "description": "Parallelism strategy for multi-device execution.",
+      "type": "string",
+      "enum": ["none", "data_parallel", "tensor_parallel", "pipeline_parallel", "fsdp", "deepspeed"]
+    },
+    "checkpoint": {
+      "title": "Checkpoint Configuration",
+      "description": "Periodic checkpointing configuration for long-running jobs.",
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether periodic checkpointing is enabled."
+        },
+        "interval_s": {
+          "type": "integer",
+          "minimum": 10,
+          "default": 300,
+          "description": "Checkpoint interval in seconds."
+        },
+        "storage_uri": {
+          "type": "string",
+          "format": "uri",
+          "description": "URI prefix for checkpoint storage."
+        },
+        "max_checkpoints": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 3,
+          "description": "Maximum checkpoints to retain (FIFO eviction)."
+        }
+      },
+      "additionalProperties": false
+    },
+    "preemption": {
+      "title": "Preemption Configuration",
+      "description": "Preemption tolerance and behavior configuration.",
+      "type": "object",
+      "properties": {
+        "preemptible": {
+          "type": "boolean",
+          "description": "Whether the job can be preempted."
+        },
+        "grace_period_s": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 30,
+          "description": "Seconds of warning before forcible preemption."
+        },
+        "checkpoint_on_preempt": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether to save a checkpoint during the preemption grace period."
+        }
+      },
+      "additionalProperties": false
+    },
+    "node_selector": {
+      "title": "Node Selector",
+      "description": "Key-value labels that a worker node MUST match.",
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "affinity": {
+      "title": "Scheduling Affinity",
+      "description": "Affinity rules with required and preferred constraints.",
+      "type": "object",
+      "properties": {
+        "required": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/affinityRule" }
+        },
+        "preferred": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/weightedAffinityRule" }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "affinityOperator": {
+      "type": "string",
+      "enum": ["In", "NotIn", "Exists", "DoesNotExist", "Gt", "Gte", "Lt", "Lte"]
+    },
+    "affinityRule": {
+      "type": "object",
+      "required": ["key", "operator"],
+      "properties": {
+        "key": { "type": "string", "minLength": 1 },
+        "operator": { "$ref": "#/$defs/affinityOperator" },
+        "values": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    },
+    "weightedAffinityRule": {
+      "type": "object",
+      "required": ["key", "operator"],
+      "properties": {
+        "key": { "type": "string", "minLength": 1 },
+        "operator": { "$ref": "#/$defs/affinityOperator" },
+        "values": { "type": "array", "items": { "type": "string" } },
+        "weight": { "type": "integer", "minimum": 0, "maximum": 100, "default": 50 }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false
