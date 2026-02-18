@@ -4,7 +4,7 @@
 [![npm](https://img.shields.io/npm/v/@openjobspec/schemas.svg)](https://www.npmjs.com/package/@openjobspec/schemas)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
-JSON Schema definitions for the [Open Job Spec (OJS)](https://openjobspec.org) v1.0.0-rc.1.
+JSON Schema definitions for the [Open Job Spec (OJS)](https://openjobspec.org) v1.0.
 
 This package provides machine-readable [JSON Schema (draft 2020-12)](https://json-schema.org/draft/2020-12/schema) definitions for all OJS data structures, enabling validation, code generation, and editor support across any programming language.
 
@@ -70,7 +70,7 @@ ajv.addSchema(errorSchema);
 const validate = ajv.compile(jobSchema);
 
 const job = {
-  specversion: "1.0.0-rc.1",
+  specversion: "1.0",
   id: "019461a8-1a2b-7c3d-8e4f-5a6b7c8d9e0f",
   type: "email.send",
   queue: "default",
@@ -105,7 +105,7 @@ with open("node_modules/@openjobspec/schemas/schemas/v1/job.schema.json") as f:
     schema = json.load(f)
 
 job = {
-    "specversion": "1.0.0-rc.1",
+    "specversion": "1.0",
     "id": "019461a8-1a2b-7c3d-8e4f-5a6b7c8d9e0f",
     "type": "email.send",
     "queue": "default",
@@ -135,7 +135,7 @@ These fixtures can be used by any OJS implementation to verify schema conformanc
 
 ## Spec Conformance
 
-These schemas conform to the [OJS Core Specification v1.0.0-rc.1](https://openjobspec.org/spec/v1/ojs-core) and the [OJS HTTP Binding v1.0.0-rc.1](https://openjobspec.org/spec/v1/ojs-http-binding).
+These schemas conform to the [OJS Core Specification v1.0](https://openjobspec.org/spec/v1/ojs-core) and the [OJS HTTP Binding v1.0](https://openjobspec.org/spec/v1/ojs-http-binding).
 
 ## License
 
