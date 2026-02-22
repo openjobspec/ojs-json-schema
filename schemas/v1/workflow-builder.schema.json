@@ -1,0 +1,183 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openjobspec.org/schemas/v1/workflow-builder.json",
+  "title": "OJS Visual Workflow Builder Definition",
+  "description": "Schema for visual workflow definitions that include both the OJS workflow spec and canvas layout metadata. Used by the Admin UI workflow builder for import/export.",
+  "type": "object",
+  "required": ["version", "workflow", "canvas"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "Schema version for forward compatibility."
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Human-readable metadata about this workflow definition.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Display name for the workflow.",
+          "maxLength": 128
+        },
+        "description": {
+          "type": "string",
+          "description": "Free-text description of what the workflow does.",
+          "maxLength": 1024
+        },
+        "author": {
+          "type": "string",
+          "description": "Creator of this workflow definition."
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When this definition was first created."
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When this definition was last modified."
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Tags for categorization and search."
+        }
+      }
+    },
+    "workflow": {
+      "$ref": "workflow.schema.json",
+      "description": "The OJS workflow definition (chain, group, or batch)."
+    },
+    "canvas": {
+      "type": "object",
+      "description": "Visual layout information for the workflow builder UI.",
+      "required": ["nodes", "edges"],
+      "properties": {
+        "zoom": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 5.0,
+          "default": 1.0,
+          "description": "Canvas zoom level."
+        },
+        "pan": {
+          "type": "object",
+          "properties": {
+            "x": { "type": "number" },
+            "y": { "type": "number" }
+          },
+          "description": "Canvas pan offset."
+        },
+        "nodes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/canvas_node" },
+          "description": "Visual nodes on the canvas."
+        },
+        "edges": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/canvas_edge" },
+          "description": "Visual edges connecting nodes."
+        }
+      }
+    },
+    "codegen": {
+      "type": "object",
+      "description": "Code generation preferences for exporting to SDK code.",
+      "properties": {
+        "language": {
+          "type": "string",
+          "enum": ["go", "typescript", "python", "java", "rust", "ruby", "csharp"],
+          "description": "Target SDK language for code generation."
+        },
+        "style": {
+          "type": "string",
+          "enum": ["inline", "modular"],
+          "description": "Code style: 'inline' for single file, 'modular' for separate files per step."
+        }
+      }
+    }
+  },
+  "$defs": {
+    "canvas_node": {
+      "type": "object",
+      "required": ["id", "type", "position"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique node identifier (matches step/job in workflow definition)."
+        },
+        "type": {
+          "type": "string",
+          "enum": ["job", "chain", "group", "batch", "callback", "start", "end"],
+          "description": "Visual node type."
+        },
+        "position": {
+          "type": "object",
+          "required": ["x", "y"],
+          "properties": {
+            "x": { "type": "number" },
+            "y": { "type": "number" }
+          }
+        },
+        "dimensions": {
+          "type": "object",
+          "properties": {
+            "width": { "type": "number", "default": 200 },
+            "height": { "type": "number", "default": 80 }
+          }
+        },
+        "data": {
+          "type": "object",
+          "description": "Node-specific display data.",
+          "properties": {
+            "label": { "type": "string" },
+            "job_type": { "type": "string" },
+            "queue": { "type": "string" },
+            "color": { "type": "string" },
+            "icon": { "type": "string" }
+          }
+        },
+        "collapsed": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether a compound node (chain/group/batch) is visually collapsed."
+        }
+      }
+    },
+    "canvas_edge": {
+      "type": "object",
+      "required": ["id", "source", "target"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique edge identifier."
+        },
+        "source": {
+          "type": "string",
+          "description": "Source node ID."
+        },
+        "target": {
+          "type": "string",
+          "description": "Target node ID."
+        },
+        "type": {
+          "type": "string",
+          "enum": ["sequential", "parallel", "callback", "error"],
+          "default": "sequential",
+          "description": "Edge type for visual styling."
+        },
+        "label": {
+          "type": "string",
+          "description": "Optional edge label (e.g., 'on_complete', 'on_failure')."
+        },
+        "animated": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether to animate this edge during live execution."
+        }
+      }
+    }
+  }
+}

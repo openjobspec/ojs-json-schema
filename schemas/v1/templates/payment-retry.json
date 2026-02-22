@@ -1,0 +1,47 @@
+{
+  "version": "1.0",
+  "metadata": {
+    "name": "Payment Processing",
+    "description": "Validate payment, charge, then send confirmation. Sequential with automatic retry on transient failures.",
+    "tags": ["payments", "fintech", "chain"]
+  },
+  "workflow": {
+    "type": "chain",
+    "name": "payment-processing",
+    "steps": [
+      {
+        "type": "payment.validate",
+        "args": ["${payment_id}", "${amount_cents}"],
+        "queue": "payments",
+        "options": { "retry": { "max_attempts": 3, "initial_interval_ms": 1000 } }
+      },
+      {
+        "type": "payment.charge",
+        "args": ["${payment_id}", "${payment_method}"],
+        "queue": "payments",
+        "options": {
+          "retry": { "max_attempts": 5, "initial_interval_ms": 2000, "backoff_multiplier": 2 },
+          "unique": { "period_seconds": 3600, "conflict_policy": "reject" }
+        }
+      },
+      {
+        "type": "payment.confirm",
+        "args": ["${payment_id}", "${customer_email}"],
+        "queue": "notifications"
+      }
+    ]
+  },
+  "canvas": {
+    "zoom": 1.0,
+    "pan": { "x": 0, "y": 0 },
+    "nodes": [
+      { "id": "validate", "type": "job", "position": { "x": 100, "y": 200 }, "data": { "label": "Validate", "job_type": "payment.validate", "color": "#f59e0b", "icon": "shield-check" } },
+      { "id": "charge", "type": "job", "position": { "x": 400, "y": 200 }, "data": { "label": "Charge", "job_type": "payment.charge", "color": "#ef4444", "icon": "credit-card" } },
+      { "id": "confirm", "type": "job", "position": { "x": 700, "y": 200 }, "data": { "label": "Confirm", "job_type": "payment.confirm", "color": "#10b981", "icon": "mail" } }
+    ],
+    "edges": [
+      { "id": "e1", "source": "validate", "target": "charge", "type": "sequential" },
+      { "id": "e2", "source": "charge", "target": "confirm", "type": "sequential" }
+    ]
+  }
+}

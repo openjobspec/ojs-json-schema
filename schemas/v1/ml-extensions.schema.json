@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openjobspec.org/schema/v1/ml-extensions.schema.json",
+  "title": "OJS ML Pipeline Extensions",
+  "description": "ML/AI pipeline-specific attributes for OJS jobs. Complements ml-resources.schema.json (compute infrastructure) with ML workflow semantics.",
+  "type": "object",
+  "properties": {
+    "ext_mlx_model_name": {
+      "type": "string",
+      "description": "Human-readable model name (e.g., 'llama-3.1-8b-custom').",
+      "maxLength": 256
+    },
+    "ext_mlx_model_version": {
+      "type": "string",
+      "description": "Semantic version of the model (e.g., '1.0.0').",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(-[a-zA-Z0-9.]+)?$"
+    },
+    "ext_mlx_model_framework": {
+      "type": "string",
+      "description": "ML framework used (e.g., 'pytorch', 'tensorflow', 'jax', 'onnx').",
+      "enum": ["pytorch", "tensorflow", "jax", "onnx", "vllm", "triton", "other"]
+    },
+    "ext_mlx_model_input_schema": {
+      "type": "object",
+      "description": "JSON Schema describing expected model input structure."
+    },
+    "ext_mlx_model_output_schema": {
+      "type": "object",
+      "description": "JSON Schema describing expected model output structure."
+    },
+    "ext_mlx_training_dataset_uri": {
+      "type": "string",
+      "format": "uri",
+      "description": "URI of the training dataset (s3://, gs://, file://)."
+    },
+    "ext_mlx_training_validation_uri": {
+      "type": "string",
+      "format": "uri",
+      "description": "URI of the validation dataset."
+    },
+    "ext_mlx_training_hyperparameters": {
+      "type": "object",
+      "description": "Opaque map of training hyperparameters (learning_rate, batch_size, etc.).",
+      "additionalProperties": true
+    },
+    "ext_mlx_training_epochs": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Number of training epochs."
+    },
+    "ext_mlx_training_checkpoint_uri": {
+      "type": "string",
+      "format": "uri",
+      "description": "URI for storing training checkpoints."
+    },
+    "ext_mlx_training_resume_from": {
+      "type": "string",
+      "format": "uri",
+      "description": "URI of a checkpoint to resume training from."
+    },
+    "ext_mlx_training_output_model_uri": {
+      "type": "string",
+      "format": "uri",
+      "description": "URI where the trained model artifact will be written."
+    },
+    "ext_mlx_inference_mode": {
+      "type": "string",
+      "description": "Inference execution mode.",
+      "enum": ["batch", "streaming", "realtime"]
+    },
+    "ext_mlx_inference_max_tokens": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Maximum tokens for LLM inference responses."
+    },
+    "ext_mlx_inference_temperature": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 2,
+      "description": "Sampling temperature for LLM inference."
+    },
+    "ext_mlx_experiment_id": {
+      "type": "string",
+      "description": "Experiment tracker ID for lineage (e.g., MLflow experiment ID).",
+      "maxLength": 256
+    },
+    "ext_mlx_run_id": {
+      "type": "string",
+      "description": "Run ID within the experiment tracker.",
+      "maxLength": 256
+    },
+    "ext_mlx_evaluation_metrics": {
+      "type": "object",
+      "description": "Map of evaluation metric names to values (accuracy, f1, loss, etc.).",
+      "additionalProperties": {
+        "type": "number"
+      }
+    },
+    "ext_mlx_evaluation_dataset_uri": {
+      "type": "string",
+      "format": "uri",
+      "description": "URI of the evaluation/test dataset."
+    },
+    "ext_mlx_preprocessing_input_uri": {
+      "type": "string",
+      "format": "uri",
+      "description": "URI of raw input data for preprocessing jobs."
+    },
+    "ext_mlx_preprocessing_output_uri": {
+      "type": "string",
+      "format": "uri",
+      "description": "URI where preprocessed data will be written."
+    },
+    "ext_mlx_preprocessing_transforms": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Ordered list of data transformations to apply (e.g., ['normalize', 'tokenize', 'split'])."
+    },
+    "ext_mlx_artifact_uris": {
+      "type": "object",
+      "description": "Map of artifact names to URIs produced by this job.",
+      "additionalProperties": {
+        "type": "string",
+        "format": "uri"
+      }
+    }
+  },
+  "additionalProperties": true
+}

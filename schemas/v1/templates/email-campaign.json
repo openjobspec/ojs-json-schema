@@ -1,0 +1,38 @@
+{
+  "version": "1.0",
+  "metadata": {
+    "name": "Email Campaign",
+    "description": "Send emails in parallel with completion callbacks for tracking. Common for marketing and transactional email.",
+    "tags": ["email", "notifications", "batch"]
+  },
+  "workflow": {
+    "type": "batch",
+    "name": "email-campaign",
+    "jobs": [
+      { "type": "email.send", "args": ["${recipient_1}", "${template}"], "queue": "email" },
+      { "type": "email.send", "args": ["${recipient_2}", "${template}"], "queue": "email" },
+      { "type": "email.send", "args": ["${recipient_3}", "${template}"], "queue": "email" }
+    ],
+    "callbacks": {
+      "on_complete": { "type": "campaign.report", "args": ["${campaign_id}"], "queue": "analytics" },
+      "on_failure": { "type": "campaign.alert", "args": ["${campaign_id}"], "queue": "alerts" }
+    }
+  },
+  "canvas": {
+    "zoom": 1.0,
+    "pan": { "x": 0, "y": 0 },
+    "nodes": [
+      { "id": "email1", "type": "job", "position": { "x": 100, "y": 100 }, "data": { "label": "Email 1", "job_type": "email.send", "color": "#6366f1" } },
+      { "id": "email2", "type": "job", "position": { "x": 100, "y": 250 }, "data": { "label": "Email 2", "job_type": "email.send", "color": "#6366f1" } },
+      { "id": "email3", "type": "job", "position": { "x": 100, "y": 400 }, "data": { "label": "Email 3", "job_type": "email.send", "color": "#6366f1" } },
+      { "id": "report", "type": "callback", "position": { "x": 450, "y": 200 }, "data": { "label": "Report", "job_type": "campaign.report", "color": "#10b981" } },
+      { "id": "alert", "type": "callback", "position": { "x": 450, "y": 350 }, "data": { "label": "Alert", "job_type": "campaign.alert", "color": "#ef4444" } }
+    ],
+    "edges": [
+      { "id": "e1", "source": "email1", "target": "report", "type": "parallel", "label": "on_complete" },
+      { "id": "e2", "source": "email2", "target": "report", "type": "parallel" },
+      { "id": "e3", "source": "email3", "target": "report", "type": "parallel" },
+      { "id": "e4", "source": "email1", "target": "alert", "type": "error", "label": "on_failure" }
+    ]
+  }
+}

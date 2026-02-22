@@ -1,0 +1,236 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openjobspec.org/schemas/v1/federation.schema.json",
+  "title": "OJS Federation Configuration",
+  "description": "Configuration schema for OJS multi-region federation. Defines topology, routing rules, health check parameters, and replication settings.",
+  "type": "object",
+  "required": ["version", "topology", "regions"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "Federation config schema version."
+    },
+    "topology": {
+      "type": "string",
+      "enum": ["hub-spoke", "mesh"],
+      "description": "Federation topology type. 'hub-spoke' has a central coordinator; 'mesh' enables peer-to-peer routing."
+    },
+    "local_region": {
+      "type": "string",
+      "description": "Identifier for the local region this configuration applies to.",
+      "examples": ["us-east-1", "eu-west-1"]
+    },
+    "regions": {
+      "type": "array",
+      "minItems": 2,
+      "items": { "$ref": "#/$defs/region" },
+      "description": "List of all regions in the federation."
+    },
+    "routing": {
+      "$ref": "#/$defs/routing_config",
+      "description": "Default routing configuration for job placement."
+    },
+    "health_check": {
+      "$ref": "#/$defs/health_check_config",
+      "description": "Health check configuration for region monitoring."
+    },
+    "replication": {
+      "$ref": "#/$defs/replication_config",
+      "description": "Cross-region metadata replication settings."
+    },
+    "circuit_breaker": {
+      "$ref": "#/$defs/circuit_breaker_config",
+      "description": "Circuit breaker settings for unhealthy regions."
+    }
+  },
+  "$defs": {
+    "region": {
+      "type": "object",
+      "required": ["id", "url"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique region identifier (e.g., 'us-east-1', 'eu-west-1').",
+          "pattern": "^[a-z0-9-]+$",
+          "maxLength": 64
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Base URL of the OJS server in this region."
+        },
+        "weight": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 100,
+          "description": "Routing weight for weighted distribution (higher = more traffic)."
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Tags for affinity routing (e.g., 'gpu', 'high-memory', 'gdpr')."
+        },
+        "is_hub": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether this region is the hub in hub-spoke topology."
+        },
+        "max_queue_depth": {
+          "type": "integer",
+          "description": "Maximum queue depth before overflow routing kicks in."
+        }
+      }
+    },
+    "routing_config": {
+      "type": "object",
+      "properties": {
+        "strategy": {
+          "type": "string",
+          "enum": ["affinity", "round-robin", "weighted", "geo-pin", "overflow", "latency"],
+          "default": "affinity",
+          "description": "Default routing strategy for job placement."
+        },
+        "fallback_strategy": {
+          "type": "string",
+          "enum": ["round-robin", "weighted", "random"],
+          "default": "round-robin",
+          "description": "Fallback strategy when primary routing fails."
+        },
+        "rules": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/routing_rule" },
+          "description": "Ordered list of routing rules. First match wins."
+        }
+      }
+    },
+    "routing_rule": {
+      "type": "object",
+      "required": ["match", "target"],
+      "properties": {
+        "match": {
+          "type": "object",
+          "description": "Job matching criteria.",
+          "properties": {
+            "job_type": {
+              "type": "string",
+              "description": "Glob pattern for job type (e.g., 'ml.*', 'email.send')."
+            },
+            "queue": {
+              "type": "string",
+              "description": "Queue name or pattern."
+            },
+            "tags": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Required job tags."
+            },
+            "meta": {
+              "type": "object",
+              "description": "Metadata field matching (e.g., {\"country\": \"DE\"})."
+            }
+          }
+        },
+        "target": {
+          "type": "object",
+          "description": "Routing target.",
+          "properties": {
+            "region": {
+              "type": "string",
+              "description": "Specific region ID."
+            },
+            "regions": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "List of eligible regions (for multi-region distribution)."
+            },
+            "strategy": {
+              "type": "string",
+              "enum": ["affinity", "round-robin", "weighted", "geo-pin", "overflow", "latency"],
+              "description": "Override routing strategy for this rule."
+            }
+          }
+        }
+      }
+    },
+    "health_check_config": {
+      "type": "object",
+      "properties": {
+        "interval_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 10,
+          "description": "Seconds between health checks."
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 5,
+          "description": "Health check request timeout."
+        },
+        "unhealthy_threshold": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 3,
+          "description": "Consecutive failures before marking region unhealthy."
+        },
+        "healthy_threshold": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 2,
+          "description": "Consecutive successes before marking region healthy again."
+        }
+      }
+    },
+    "replication_config": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether to replicate job metadata across regions."
+        },
+        "mode": {
+          "type": "string",
+          "enum": ["metadata-only", "full"],
+          "default": "metadata-only",
+          "description": "'metadata-only' replicates state and metadata; 'full' replicates job args too."
+        },
+        "max_lag_seconds": {
+          "type": "integer",
+          "default": 30,
+          "description": "Maximum acceptable replication lag before alerting."
+        }
+      }
+    },
+    "circuit_breaker_config": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to enable circuit breaker for unhealthy regions."
+        },
+        "open_after_failures": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 5,
+          "description": "Number of consecutive failures before opening the circuit."
+        },
+        "half_open_after_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 30,
+          "description": "Seconds before attempting to close the circuit (half-open state)."
+        },
+        "probe_count": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 3,
+          "description": "Number of probe requests in half-open state before closing."
+        }
+      }
+    }
+  }
+}

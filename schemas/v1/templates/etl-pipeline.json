@@ -1,0 +1,42 @@
+{
+  "version": "1.0",
+  "metadata": {
+    "name": "ETL Pipeline",
+    "description": "Extract data from source, transform it, then load into destination. A common data engineering pattern.",
+    "tags": ["etl", "data-engineering", "pipeline"]
+  },
+  "workflow": {
+    "type": "chain",
+    "name": "etl-pipeline",
+    "steps": [
+      {
+        "type": "etl.extract",
+        "args": ["${source_uri}", "${format}"],
+        "queue": "etl"
+      },
+      {
+        "type": "etl.transform",
+        "args": ["${transform_config}"],
+        "queue": "etl"
+      },
+      {
+        "type": "etl.load",
+        "args": ["${destination_uri}"],
+        "queue": "etl"
+      }
+    ]
+  },
+  "canvas": {
+    "zoom": 1.0,
+    "pan": { "x": 0, "y": 0 },
+    "nodes": [
+      { "id": "extract", "type": "job", "position": { "x": 100, "y": 200 }, "data": { "label": "Extract", "job_type": "etl.extract", "color": "#3b82f6", "icon": "download" } },
+      { "id": "transform", "type": "job", "position": { "x": 400, "y": 200 }, "data": { "label": "Transform", "job_type": "etl.transform", "color": "#f59e0b", "icon": "shuffle" } },
+      { "id": "load", "type": "job", "position": { "x": 700, "y": 200 }, "data": { "label": "Load", "job_type": "etl.load", "color": "#10b981", "icon": "upload" } }
+    ],
+    "edges": [
+      { "id": "e1", "source": "extract", "target": "transform", "type": "sequential" },
+      { "id": "e2", "source": "transform", "target": "load", "type": "sequential" }
+    ]
+  }
+}

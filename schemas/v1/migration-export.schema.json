@@ -1,0 +1,199 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openjobspec.org/schemas/v1/migration-export.json",
+  "title": "OJS Cross-Backend Migration Export Format",
+  "description": "Portable serialization format for exporting jobs from one OJS backend and importing into another. Used by 'ojs migrate' CLI command for zero-downtime backend migrations.",
+  "type": "object",
+  "required": ["version", "source", "exported_at", "jobs"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "Export format version."
+    },
+    "source": {
+      "type": "object",
+      "required": ["backend", "url"],
+      "description": "Source backend metadata.",
+      "properties": {
+        "backend": {
+          "type": "string",
+          "enum": ["redis", "postgres", "nats", "kafka", "sqs", "lite"],
+          "description": "Source backend type."
+        },
+        "url": {
+          "type": "string",
+          "description": "Source server URL."
+        },
+        "version": {
+          "type": "string",
+          "description": "Source server OJS version."
+        }
+      }
+    },
+    "target": {
+      "type": "object",
+      "description": "Target backend metadata (set during import).",
+      "properties": {
+        "backend": {
+          "type": "string",
+          "enum": ["redis", "postgres", "nats", "kafka", "sqs", "lite"]
+        },
+        "url": { "type": "string" },
+        "version": { "type": "string" }
+      }
+    },
+    "exported_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this export was created."
+    },
+    "options": {
+      "type": "object",
+      "description": "Export options that were used.",
+      "properties": {
+        "include_completed": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether to include completed/terminal jobs."
+        },
+        "include_dead_letter": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to include dead letter queue jobs."
+        },
+        "queues": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Filter to specific queues. Empty = all queues."
+        },
+        "since": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Only export jobs created after this timestamp."
+        }
+      }
+    },
+    "jobs": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/migration_job" },
+      "description": "Array of jobs to migrate."
+    },
+    "cron_jobs": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/migration_cron" },
+      "description": "Cron job definitions to migrate."
+    },
+    "workflows": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/migration_workflow" },
+      "description": "Active workflow definitions to migrate."
+    },
+    "checksum": {
+      "type": "string",
+      "description": "SHA-256 checksum of the jobs array for integrity verification."
+    },
+    "stats": {
+      "type": "object",
+      "description": "Summary statistics of the export.",
+      "properties": {
+        "total_jobs": { "type": "integer" },
+        "by_state": {
+          "type": "object",
+          "additionalProperties": { "type": "integer" }
+        },
+        "by_queue": {
+          "type": "object",
+          "additionalProperties": { "type": "integer" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "migration_job": {
+      "type": "object",
+      "required": ["id", "type", "queue", "state", "args"],
+      "description": "A job in portable migration format. All timestamps are RFC 3339 UTC.",
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string" },
+        "queue": { "type": "string" },
+        "state": {
+          "type": "string",
+          "enum": ["scheduled", "available", "pending", "active", "completed", "retryable", "cancelled", "discarded"]
+        },
+        "args": { "type": "array" },
+        "meta": { "type": "object" },
+        "priority": { "type": "integer" },
+        "attempt": { "type": "integer" },
+        "max_attempts": { "type": "integer" },
+        "created_at": { "type": "string", "format": "date-time" },
+        "enqueued_at": { "type": "string", "format": "date-time" },
+        "scheduled_at": { "type": "string", "format": "date-time" },
+        "started_at": { "type": "string", "format": "date-time" },
+        "completed_at": { "type": "string", "format": "date-time" },
+        "expires_at": { "type": "string", "format": "date-time" },
+        "error": { "type": "string" },
+        "error_history": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "message": { "type": "string" },
+              "attempt": { "type": "integer" },
+              "occurred_at": { "type": "string", "format": "date-time" }
+            }
+          }
+        },
+        "retry": { "$ref": "retry-policy.schema.json" },
+        "unique": { "$ref": "unique-policy.schema.json" },
+        "workflow_id": { "type": "string" },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "extensions": {
+          "type": "object",
+          "description": "All ext_* fields preserved as a flat map.",
+          "additionalProperties": true
+        }
+      }
+    },
+    "migration_cron": {
+      "type": "object",
+      "required": ["name", "expression", "job_template"],
+      "properties": {
+        "name": { "type": "string" },
+        "expression": { "type": "string" },
+        "timezone": { "type": "string" },
+        "job_template": { "type": "object" },
+        "overlap_policy": {
+          "type": "string",
+          "enum": ["allow", "skip", "cancel"]
+        }
+      }
+    },
+    "migration_workflow": {
+      "type": "object",
+      "required": ["id", "type", "state"],
+      "properties": {
+        "id": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": ["chain", "group", "batch"]
+        },
+        "state": {
+          "type": "string",
+          "enum": ["pending", "running", "completed", "failed", "cancelled"]
+        },
+        "total": { "type": "integer" },
+        "completed": { "type": "integer" },
+        "failed": { "type": "integer" },
+        "job_ids": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  }
+}
