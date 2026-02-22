@@ -66,6 +66,8 @@
   "devDependencies": {
     "ajv": "^8.17.0",
     "ajv-formats": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
-
