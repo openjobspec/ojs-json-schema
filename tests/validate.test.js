@@ -68,3 +68,4 @@ console.log();
 console.log(`Valid fixtures: ${pass} passed, ${fail} failed`);
 console.log(`Invalid fixtures: ${invalidPass} correctly rejected, ${invalidFail} incorrectly accepted`);
 process.exit(fail + invalidFail);
+
