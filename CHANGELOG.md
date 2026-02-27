@@ -15,3 +15,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Named exports in package.json for direct schema imports
 - AJV-based validation test suite
 - README with installation, usage, and schema reference
+
