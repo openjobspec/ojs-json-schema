@@ -1,6 +1,6 @@
 {
   "name": "@openjobspec/schemas",
-  "version": "1.0.0-rc.1",
+  "version": "0.2.0",
   "description": "JSON Schema definitions for the Open Job Spec (OJS) v1.0.0-rc.1. Includes job envelope, retry policy, unique policy, error, event, workflow, cron, and HTTP binding schemas.",
   "keywords": [
     "openjobspec",
