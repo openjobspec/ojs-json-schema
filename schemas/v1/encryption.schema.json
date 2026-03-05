@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openjobspec.org/schemas/v1/encryption.json",
+  "title": "OJS Encryption Extension",
+  "description": "Schema for OJS client-side encryption using the codec pipeline. Defines the encoded payload structure, codec metadata, and encryption parameters for AES-256-GCM encryption of job args.",
+  "type": "object",
+  "definitions": {
+    "codecMetadata": {
+      "title": "Codec Metadata",
+      "description": "Metadata fields stored in the job's meta object to describe applied encodings.",
+      "type": "object",
+      "properties": {
+        "ojs.codec.encodings": {
+          "title": "Applied Encodings",
+          "description": "Ordered array of encoding names applied to the job args. Decoders MUST reverse the encodings in reverse order.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "minItems": 1,
+          "examples": [
+            ["binary/encrypted"],
+            ["zstd/plain", "binary/encrypted"]
+          ]
+        },
+        "ojs.codec.key_id": {
+          "title": "Encryption Key ID",
+          "description": "Identifier of the encryption key used. MUST be present when any encoding involves encryption.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "examples": ["prod-key-2024-01", "kms:aws:arn:aws:kms:us-east-1:123456789:key/abc"]
+        }
+      },
+      "additionalProperties": true
+    },
+    "encodedPayload": {
+      "title": "Encoded Payload",
+      "description": "Structure of an encoded (encrypted/compressed) job args payload.",
+      "type": "object",
+      "required": ["ojs_encoded", "encoding", "data"],
+      "properties": {
+        "ojs_encoded": {
+          "title": "Encoded Marker",
+          "description": "Marker field indicating this is an encoded payload. MUST be true.",
+          "type": "boolean",
+          "const": true
+        },
+        "encoding": {
+          "title": "Encoding Name",
+          "description": "The encoding applied to produce this payload.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "examples": ["binary/encrypted", "zstd/plain"]
+        },
+        "data": {
+          "title": "Encoded Data",
+          "description": "Base64-encoded bytes of the encrypted/compressed payload.",
+          "type": "string",
+          "contentEncoding": "base64"
+        },
+        "metadata": {
+          "title": "Encoding Metadata",
+          "description": "Additional metadata for the encoding.",
+          "type": "object",
+          "properties": {
+            "encryption_key_id": {
+              "title": "Encryption Key ID",
+              "description": "Key identifier used for encryption.",
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "encryptionParameters": {
+      "title": "Encryption Parameters",
+      "description": "Parameters for AES-256-GCM encryption used by the OJS codec pipeline.",
+      "type": "object",
+      "properties": {
+        "algorithm": {
+          "title": "Algorithm",
+          "description": "Encryption algorithm identifier.",
+          "type": "string",
+          "const": "AES-256-GCM"
+        },
+        "key_size_bits": {
+          "title": "Key Size (bits)",
+          "description": "Size of the encryption key in bits.",
+          "type": "integer",
+          "const": 256
+        },
+        "nonce_size_bytes": {
+          "title": "Nonce Size (bytes)",
+          "description": "Size of the random nonce in bytes. MUST be 12 for AES-256-GCM.",
+          "type": "integer",
+          "const": 12
+        },
+        "tag_size_bytes": {
+          "title": "Authentication Tag Size (bytes)",
+          "description": "Size of the GCM authentication tag in bytes.",
+          "type": "integer",
+          "const": 16
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "examples": [
+    {
+      "ojs_encoded": true,
+      "encoding": "binary/encrypted",
+      "data": "AQAAAAAAAAAAAAAAAAxlbmNyeXB0ZWRfcGF5bG9hZA==",
+      "metadata": {
+        "encryption_key_id": "prod-key-2024-01"
+      }
+    }
+  ]
+}

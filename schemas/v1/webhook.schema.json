@@ -1,0 +1,197 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openjobspec.org/schemas/v1/webhook.json",
+  "title": "OJS Webhook Subscription",
+  "description": "Schema for OJS webhook subscriptions. Webhooks enable external systems to receive HTTP POST notifications when job lifecycle events occur. Deliveries are signed with HMAC-SHA256 for authenticity verification.",
+  "type": "object",
+  "definitions": {
+    "webhookSubscription": {
+      "title": "Webhook Subscription",
+      "description": "A webhook subscription configuration.",
+      "type": "object",
+      "required": ["url", "events"],
+      "properties": {
+        "id": {
+          "title": "Subscription ID",
+          "description": "Unique identifier for this subscription. System-generated.",
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "url": {
+          "title": "Endpoint URL",
+          "description": "The URL to deliver webhook events to. MUST use HTTPS in production environments.",
+          "type": "string",
+          "format": "uri",
+          "examples": ["https://api.example.com/webhooks/ojs"]
+        },
+        "events": {
+          "title": "Event Types",
+          "description": "List of event types to deliver. Supports the '*' wildcard to subscribe to all events.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "minItems": 1,
+          "uniqueItems": true,
+          "examples": [
+            ["job.completed", "job.failed"],
+            ["*"],
+            ["job.completed", "job.discarded", "workflow.completed"]
+          ]
+        },
+        "active": {
+          "title": "Active",
+          "description": "Whether this subscription is active. Inactive subscriptions do not receive deliveries.",
+          "type": "boolean",
+          "default": true
+        },
+        "secret": {
+          "title": "Signing Secret",
+          "description": "HMAC-SHA256 signing secret. Returned only at creation time. Use to verify delivery authenticity.",
+          "type": "string",
+          "minLength": 32,
+          "maxLength": 256
+        },
+        "metadata": {
+          "title": "Metadata",
+          "description": "Arbitrary key-value metadata for this subscription.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "filter": {
+          "title": "Event Filter",
+          "description": "Optional filters to narrow which events are delivered.",
+          "type": "object",
+          "properties": {
+            "queues": {
+              "title": "Queue Filter",
+              "description": "Only deliver events for jobs in these queues.",
+              "type": "array",
+              "items": { "type": "string" },
+              "uniqueItems": true,
+              "examples": [["default", "critical"]]
+            },
+            "job_types": {
+              "title": "Job Type Filter",
+              "description": "Only deliver events for these job types.",
+              "type": "array",
+              "items": { "type": "string" },
+              "uniqueItems": true,
+              "examples": [["email.send", "billing.charge"]]
+            }
+          },
+          "additionalProperties": false
+        },
+        "created_at": {
+          "title": "Created At",
+          "description": "Timestamp when this subscription was created.",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "additionalProperties": false
+    },
+    "webhookDelivery": {
+      "title": "Webhook Delivery",
+      "description": "The payload delivered to a webhook endpoint via HTTP POST.",
+      "type": "object",
+      "required": ["event_type", "delivery_id", "subscription_id", "timestamp", "data"],
+      "properties": {
+        "event_type": {
+          "title": "Event Type",
+          "description": "The type of event that triggered this delivery.",
+          "type": "string",
+          "examples": ["job.completed", "job.failed", "workflow.completed"]
+        },
+        "delivery_id": {
+          "title": "Delivery ID",
+          "description": "Unique identifier for this delivery attempt.",
+          "type": "string"
+        },
+        "subscription_id": {
+          "title": "Subscription ID",
+          "description": "The subscription that triggered this delivery.",
+          "type": "string"
+        },
+        "timestamp": {
+          "title": "Timestamp",
+          "description": "Unix timestamp in seconds when the delivery was initiated.",
+          "type": "integer"
+        },
+        "data": {
+          "title": "Event Data",
+          "description": "The event payload containing job or workflow details.",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false
+    },
+    "deliveryHeaders": {
+      "title": "Webhook Delivery Headers",
+      "description": "HTTP headers included in every webhook delivery.",
+      "type": "object",
+      "required": [
+        "Content-Type",
+        "X-OJS-Event-Type",
+        "X-OJS-Delivery-ID",
+        "X-OJS-Subscription-ID",
+        "X-OJS-Signature",
+        "X-OJS-Timestamp"
+      ],
+      "properties": {
+        "Content-Type": {
+          "type": "string",
+          "const": "application/json"
+        },
+        "X-OJS-Event-Type": {
+          "title": "Event Type Header",
+          "description": "The event type string.",
+          "type": "string"
+        },
+        "X-OJS-Delivery-ID": {
+          "title": "Delivery ID Header",
+          "description": "Unique delivery identifier.",
+          "type": "string"
+        },
+        "X-OJS-Subscription-ID": {
+          "title": "Subscription ID Header",
+          "description": "Subscription that triggered this delivery.",
+          "type": "string"
+        },
+        "X-OJS-Signature": {
+          "title": "Signature Header",
+          "description": "HMAC-SHA256 signature in the format sha256=<hex>. Computed as HMAC-SHA256(secret, timestamp + '.' + body).",
+          "type": "string",
+          "pattern": "^sha256=[a-f0-9]{64}$"
+        },
+        "X-OJS-Timestamp": {
+          "title": "Timestamp Header",
+          "description": "Unix timestamp in seconds.",
+          "type": "string",
+          "pattern": "^[0-9]+$"
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "examples": [
+    {
+      "url": "https://api.example.com/webhooks/ojs",
+      "events": ["job.completed", "job.failed"],
+      "metadata": {
+        "team": "platform"
+      }
+    },
+    {
+      "url": "https://monitoring.example.com/ojs",
+      "events": ["*"],
+      "filter": {
+        "queues": ["critical"]
+      }
+    }
+  ]
+}

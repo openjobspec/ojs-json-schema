@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openjobspec.org/schemas/v1/checkpoint.json",
+  "title": "OJS Durable Execution Checkpoint",
+  "description": "Schema for OJS durable execution checkpoints. Checkpoints enable jobs to save intermediate state for resumability after failures, preemptions, or restarts. Each job has at most one checkpoint; the latest save overwrites the previous.",
+  "type": "object",
+  "definitions": {
+    "checkpointRequest": {
+      "title": "Checkpoint Save Request",
+      "description": "Request body for POST /ojs/v1/jobs/{id}/checkpoint. Saves or overwrites the checkpoint for the given job.",
+      "type": "object",
+      "required": ["state"],
+      "properties": {
+        "state": {
+          "title": "Checkpoint State",
+          "description": "Any valid JSON value representing the job's intermediate state. MUST NOT exceed 1 MB (1,048,576 bytes) when serialized.",
+          "examples": [
+            { "epoch": 5, "step": 2400, "loss": 0.042 },
+            { "processed_ids": [1, 2, 3], "cursor": "abc123" },
+            "simple-string-state"
+          ]
+        },
+        "sequence": {
+          "title": "Sequence Number",
+          "description": "Monotonically increasing checkpoint counter. If provided, the backend MUST reject the save if the sequence is not strictly greater than the stored sequence (optimistic concurrency).",
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "checkpointResponse": {
+      "title": "Checkpoint Response",
+      "description": "Response body for GET /ojs/v1/jobs/{id}/checkpoint and POST /ojs/v1/jobs/{id}/checkpoint.",
+      "type": "object",
+      "required": ["job_id", "state", "sequence", "created_at"],
+      "properties": {
+        "job_id": {
+          "title": "Job ID",
+          "description": "The job this checkpoint belongs to.",
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "state": {
+          "title": "Checkpoint State",
+          "description": "The stored checkpoint state. Any valid JSON value."
+        },
+        "sequence": {
+          "title": "Sequence Number",
+          "description": "Monotonically increasing checkpoint counter.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "created_at": {
+          "title": "Created At",
+          "description": "Timestamp of the most recent checkpoint save in RFC 3339 format.",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "examples": [
+    {
+      "job_id": "019461a8-1a2b-7c3d-8e4f-5a6b7c8d9e0f",
+      "state": {
+        "epoch": 5,
+        "step": 2400,
+        "loss": 0.042,
+        "optimizer_state": "base64-encoded-data"
+      },
+      "sequence": 5,
+      "created_at": "2026-03-05T10:30:00Z"
+    },
+    {
+      "job_id": "019461a8-2b3c-7d4e-9f50-6a7b8c9d0e1f",
+      "state": {
+        "processed_ids": [1, 2, 3, 4, 5],
+        "cursor": "page_token_abc123",
+        "batch_index": 42
+      },
+      "sequence": 42,
+      "created_at": "2026-03-05T11:00:00Z"
+    }
+  ]
+}
