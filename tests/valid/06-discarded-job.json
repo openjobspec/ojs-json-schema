@@ -1,7 +1,7 @@
 {
   "_description": "Job that exhausted all retry attempts (dead letter queue)",
   "specversion": "1.0",
-  "id": "019461a8-5e6f-7071-c283-9d0e1f2a3b4c",
+  "id": "019461a8-5e6f-7071-8283-9d0e1f2a3b4c",
   "type": "payment.process",
   "queue": "payments",
   "args": [{"order_id": "ord_98765", "amount": 49.99, "currency": "USD"}],

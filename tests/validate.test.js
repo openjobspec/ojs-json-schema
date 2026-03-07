@@ -22,7 +22,12 @@ function loadSchemas(dir) {
     if (!f.endsWith('.schema.json')) continue;
     const s = JSON.parse(fs.readFileSync(fp, 'utf8'));
     try {
-      ajv.addSchema(s);
+      // Strip $schema meta-reference that AJV doesn't resolve by default
+      const { $schema, ...schemaWithoutMeta } = s;
+      if (s.$id) {
+        schemaWithoutMeta.$id = s.$id;
+      }
+      ajv.addSchema(schemaWithoutMeta);
     } catch (e) {
       console.log('Schema load error:', f, e.message);
     }

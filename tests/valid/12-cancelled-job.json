@@ -1,7 +1,7 @@
 {
   "_description": "Job that was cancelled during execution",
   "specversion": "1.0",
-  "id": "019461a8-c5d6-77e8-f90a-6e7f80910213",
+  "id": "019461a8-c5d6-77e8-b90a-6e7f80910213",
   "type": "video.transcode",
   "queue": "media",
   "args": ["video_12345", "1080p", {"format": "mp4"}],
