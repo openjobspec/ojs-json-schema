@@ -140,3 +140,4 @@ These schemas conform to the [OJS Core Specification v1.0](https://openjobspec.o
 ## License
 
 [Apache 2.0](LICENSE)
+
