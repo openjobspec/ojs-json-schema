@@ -1,0 +1,8 @@
+{
+  "_description": "Invalid: args is null instead of an array",
+  "specversion": "1.0",
+  "id": "019461a8-1a2b-7c3d-8e4f-5a6b7c8d9e13",
+  "type": "email.send",
+  "queue": "default",
+  "args": null
+}

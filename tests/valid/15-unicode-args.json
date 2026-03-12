@@ -1,0 +1,12 @@
+{
+  "_description": "Valid job with unicode characters in args and meta",
+  "specversion": "1.0",
+  "id": "019461a8-1a2b-7c3d-8e4f-5a6b7c8d9e10",
+  "type": "notification.send",
+  "queue": "default",
+  "args": ["用户@example.com", "Bienvenue 🎉", "Ñoño", "日本語テスト"],
+  "meta": {
+    "locale": "zh-CN",
+    "greeting": "你好世界"
+  }
+}

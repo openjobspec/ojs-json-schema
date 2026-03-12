@@ -1,0 +1,22 @@
+{
+  "_description": "Valid job with deeply nested args to test schema depth handling",
+  "specversion": "1.0",
+  "id": "019461a8-1a2b-7c3d-8e4f-5a6b7c8d9e12",
+  "type": "data.transform",
+  "queue": "default",
+  "args": [
+    {
+      "level1": {
+        "level2": {
+          "level3": {
+            "level4": {
+              "value": "deep"
+            }
+          }
+        }
+      }
+    },
+    [[[["nested-array"]]]],
+    {"mixed": [1, {"a": [true, null, "str"]}]}
+  ]
+}

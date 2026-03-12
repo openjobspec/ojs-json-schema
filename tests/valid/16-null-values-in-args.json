@@ -1,0 +1,8 @@
+{
+  "_description": "Valid job with null values in args array (null is a valid JSON type)",
+  "specversion": "1.0",
+  "id": "019461a8-1a2b-7c3d-8e4f-5a6b7c8d9e11",
+  "type": "data.process",
+  "queue": "default",
+  "args": [null, "value", null, 42, true, null]
+}
