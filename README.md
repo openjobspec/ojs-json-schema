@@ -1,4 +1,5 @@
 # @openjobspec/schemas
+[![Stability: stable](https://img.shields.io/badge/stability-stable-brightgreen.svg)](https://github.com/openjobspec/openjobspec/blob/main/STABILITY.md)
 
 [![CI](https://github.com/openjobspec/ojs-json-schema/actions/workflows/ci.yml/badge.svg)](https://github.com/openjobspec/ojs-json-schema/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/@openjobspec/schemas.svg)](https://www.npmjs.com/package/@openjobspec/schemas)
