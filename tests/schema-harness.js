@@ -184,3 +184,26 @@ export function runValidation({ log = console.log } = {}) {
   return valid.failed + invalid.failed;
 }
 
+export function readPackageManifest() {
+  return readJson(path.join(repositoryRoot, 'package.json'), 'package manifest');
+}
+
+export function publicExportTargets(packageManifest = readPackageManifest()) {
+  return [
+    ...new Set(
+      Object.values(packageManifest.exports).map((target) =>
+        typeof target === 'string' ? target : target['openjobspec-schema'],
+      ),
+    ),
+  ].sort();
+}
+
+export function exportTargetPath(target) {
+  const wildcardIndex = target.indexOf('*');
+  const staticTarget = wildcardIndex === -1 ? target : target.slice(0, wildcardIndex);
+  return path.resolve(repositoryRoot, staticTarget);
+}
+
+export function schemaPathSet(records) {
+  return new Set(records.map(({ filePath }) => path.resolve(filePath)));
+}

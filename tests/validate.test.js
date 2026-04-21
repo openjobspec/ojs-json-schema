@@ -7,9 +7,13 @@ import test from 'node:test';
 import {
   buildSchemaRegistry,
   discoverSchemas,
+  exportTargetPath,
+  publicExportTargets,
+  readPackageManifest,
   registerSchemas,
   repositoryRoot,
   runValidation,
+  schemaPathSet,
   validateFixtureDirectory,
 } from './schema-harness.js';
 
@@ -171,6 +175,22 @@ test('affected schemas validate through canonical external references', () => {
   const invalidWorkflow = structuredClone(builder);
   invalidWorkflow.workflow.type = 'sequence';
   assert.equal(workflowBuilder(invalidWorkflow), false);
+});
+
+test('every public package export target exists and exported schemas compile', () => {
+  const packageManifest = readPackageManifest();
+  const { records, validators } = buildSchemaRegistry();
+  const schemaPaths = schemaPathSet(records);
+
+  for (const target of publicExportTargets(packageManifest)) {
+    const targetPath = exportTargetPath(target);
+    assert.equal(fs.existsSync(targetPath), true, `Missing package export target: ${target}`);
+
+    if (!target.includes('*') && target.endsWith('.json')) {
+      assert.equal(schemaPaths.has(targetPath), true, `Export is not a discovered schema: ${target}`);
+      assert.equal(validators.has(targetPath), true, `Export was not compiled: ${target}`);
+    }
+  }
 });
 
 test('normalized divergence hashes are identical for LF and CRLF', () => {

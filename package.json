@@ -1,6 +1,6 @@
 {
   "name": "@openjobspec/schemas",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "JSON Schema definitions for the Open Job Spec (OJS) v1.0.0-rc.1. Includes job envelope, retry policy, unique policy, error, event, workflow, cron, and HTTP binding schemas.",
   "keywords": [
     "openjobspec",
@@ -22,37 +22,166 @@
   "license": "Apache-2.0",
   "author": "Open Job Spec Contributors",
   "type": "module",
+  "main": "./dist/cjs/schemas/v1/job.schema.json.cjs",
+  "module": "./dist/esm/schemas/v1/job.schema.json.js",
+  "types": "./dist/types/schema.d.cts",
   "exports": {
     ".": {
-      "import": "./schemas/v1/job.schema.json",
-      "require": "./schemas/v1/job.schema.json"
+      "openjobspec-schema": "./schemas/v1/job.schema.json",
+      "import": { "types": "./dist/types/schema.d.ts", "default": "./dist/esm/schemas/v1/job.schema.json.js" },
+      "require": { "types": "./dist/types/schema.d.cts", "default": "./dist/cjs/schemas/v1/job.schema.json.cjs" }
     },
-    "./job": "./schemas/v1/job.schema.json",
-    "./job-options": "./schemas/v1/job-options.schema.json",
-    "./retry-policy": "./schemas/v1/retry-policy.schema.json",
-    "./unique-policy": "./schemas/v1/unique-policy.schema.json",
-    "./error": "./schemas/v1/error.schema.json",
-    "./api-error": "./schemas/v1/api-error.schema.json",
-    "./event": "./schemas/v1/event.schema.json",
-    "./workflow": "./schemas/v1/workflow.schema.json",
-    "./cron": "./schemas/v1/cron.schema.json",
-    "./queue-stats": "./schemas/v1/queue-stats.schema.json",
-    "./worker-info": "./schemas/v1/worker-info.schema.json",
-    "./manifest": "./schemas/v1/manifest.schema.json",
-    "./http/enqueue-request": "./schemas/v1/http/enqueue-request.schema.json",
-    "./http/enqueue-response": "./schemas/v1/http/enqueue-response.schema.json",
-    "./http/batch-enqueue-request": "./schemas/v1/http/batch-enqueue-request.schema.json",
-    "./http/batch-enqueue-response": "./schemas/v1/http/batch-enqueue-response.schema.json",
-    "./http/fetch-request": "./schemas/v1/http/fetch-request.schema.json",
-    "./http/fetch-response": "./schemas/v1/http/fetch-response.schema.json",
-    "./http/ack-request": "./schemas/v1/http/ack-request.schema.json",
-    "./http/nack-request": "./schemas/v1/http/nack-request.schema.json",
-    "./http/heartbeat-request": "./schemas/v1/http/heartbeat-request.schema.json",
-    "./http/heartbeat-response": "./schemas/v1/http/heartbeat-response.schema.json",
-    "./extensions/ml-resources": "./extensions/ml-resources.json",
-    "./schemas/*": "./schemas/*"
+    "./job": {
+      "openjobspec-schema": "./schemas/v1/job.schema.json",
+      "import": { "types": "./dist/types/schema.d.ts", "default": "./dist/esm/schemas/v1/job.schema.json.js" },
+      "require": { "types": "./dist/types/schema.d.cts", "default": "./dist/cjs/schemas/v1/job.schema.json.cjs" }
+    },
+    "./job-options": {
+      "openjobspec-schema": "./schemas/v1/job-options.schema.json",
+      "import": { "types": "./dist/types/schema.d.ts", "default": "./dist/esm/schemas/v1/job-options.schema.json.js" },
+      "require": { "types": "./dist/types/schema.d.cts", "default": "./dist/cjs/schemas/v1/job-options.schema.json.cjs" }
+    },
+    "./retry-policy": {
+      "openjobspec-schema": "./schemas/v1/retry-policy.schema.json",
+      "import": { "types": "./dist/types/schema.d.ts", "default": "./dist/esm/schemas/v1/retry-policy.schema.json.js" },
+      "require": { "types": "./dist/types/schema.d.cts", "default": "./dist/cjs/schemas/v1/retry-policy.schema.json.cjs" }
+    },
+    "./unique-policy": {
+      "openjobspec-schema": "./schemas/v1/unique-policy.schema.json",
+      "import": { "types": "./dist/types/schema.d.ts", "default": "./dist/esm/schemas/v1/unique-policy.schema.json.js" },
+      "require": { "types": "./dist/types/schema.d.cts", "default": "./dist/cjs/schemas/v1/unique-policy.schema.json.cjs" }
+    },
+    "./error": {
+      "openjobspec-schema": "./schemas/v1/error.schema.json",
+      "import": { "types": "./dist/types/schema.d.ts", "default": "./dist/esm/schemas/v1/error.schema.json.js" },
+      "require": { "types": "./dist/types/schema.d.cts", "default": "./dist/cjs/schemas/v1/error.schema.json.cjs" }
+    },
+    "./api-error": {
+      "openjobspec-schema": "./schemas/v1/api-error.schema.json",
+      "import": { "types": "./dist/types/schema.d.ts", "default": "./dist/esm/schemas/v1/api-error.schema.json.js" },
+      "require": { "types": "./dist/types/schema.d.cts", "default": "./dist/cjs/schemas/v1/api-error.schema.json.cjs" }
+    },
+    "./event": {
+      "openjobspec-schema": "./schemas/v1/event.schema.json",
+      "import": { "types": "./dist/types/schema.d.ts", "default": "./dist/esm/schemas/v1/event.schema.json.js" },
+      "require": { "types": "./dist/types/schema.d.cts", "default": "./dist/cjs/schemas/v1/event.schema.json.cjs" }
+    },
+    "./workflow": {
+      "openjobspec-schema": "./schemas/v1/workflow.schema.json",
+      "import": { "types": "./dist/types/schema.d.ts", "default": "./dist/esm/schemas/v1/workflow.schema.json.js" },
+      "require": { "types": "./dist/types/schema.d.cts", "default": "./dist/cjs/schemas/v1/workflow.schema.json.cjs" }
+    },
+    "./cron": {
+      "openjobspec-schema": "./schemas/v1/cron.schema.json",
+      "import": { "types": "./dist/types/schema.d.ts", "default": "./dist/esm/schemas/v1/cron.schema.json.js" },
+      "require": { "types": "./dist/types/schema.d.cts", "default": "./dist/cjs/schemas/v1/cron.schema.json.cjs" }
+    },
+    "./queue-stats": {
+      "openjobspec-schema": "./schemas/v1/queue-stats.schema.json",
+      "import": { "types": "./dist/types/schema.d.ts", "default": "./dist/esm/schemas/v1/queue-stats.schema.json.js" },
+      "require": { "types": "./dist/types/schema.d.cts", "default": "./dist/cjs/schemas/v1/queue-stats.schema.json.cjs" }
+    },
+    "./worker-info": {
+      "openjobspec-schema": "./schemas/v1/worker-info.schema.json",
+      "import": { "types": "./dist/types/schema.d.ts", "default": "./dist/esm/schemas/v1/worker-info.schema.json.js" },
+      "require": { "types": "./dist/types/schema.d.cts", "default": "./dist/cjs/schemas/v1/worker-info.schema.json.cjs" }
+    },
+    "./manifest": {
+      "openjobspec-schema": "./schemas/v1/manifest.schema.json",
+      "import": { "types": "./dist/types/schema.d.ts", "default": "./dist/esm/schemas/v1/manifest.schema.json.js" },
+      "require": { "types": "./dist/types/schema.d.cts", "default": "./dist/cjs/schemas/v1/manifest.schema.json.cjs" }
+    },
+    "./http/enqueue-request": {
+      "openjobspec-schema": "./schemas/v1/http/enqueue-request.schema.json",
+      "import": { "types": "./dist/types/schema.d.ts", "default": "./dist/esm/schemas/v1/http/enqueue-request.schema.json.js" },
+      "require": { "types": "./dist/types/schema.d.cts", "default": "./dist/cjs/schemas/v1/http/enqueue-request.schema.json.cjs" }
+    },
+    "./http/enqueue-response": {
+      "openjobspec-schema": "./schemas/v1/http/enqueue-response.schema.json",
+      "import": { "types": "./dist/types/schema.d.ts", "default": "./dist/esm/schemas/v1/http/enqueue-response.schema.json.js" },
+      "require": { "types": "./dist/types/schema.d.cts", "default": "./dist/cjs/schemas/v1/http/enqueue-response.schema.json.cjs" }
+    },
+    "./http/batch-enqueue-request": {
+      "openjobspec-schema": "./schemas/v1/http/batch-enqueue-request.schema.json",
+      "import": { "types": "./dist/types/schema.d.ts", "default": "./dist/esm/schemas/v1/http/batch-enqueue-request.schema.json.js" },
+      "require": { "types": "./dist/types/schema.d.cts", "default": "./dist/cjs/schemas/v1/http/batch-enqueue-request.schema.json.cjs" }
+    },
+    "./http/batch-enqueue-response": {
+      "openjobspec-schema": "./schemas/v1/http/batch-enqueue-response.schema.json",
+      "import": { "types": "./dist/types/schema.d.ts", "default": "./dist/esm/schemas/v1/http/batch-enqueue-response.schema.json.js" },
+      "require": { "types": "./dist/types/schema.d.cts", "default": "./dist/cjs/schemas/v1/http/batch-enqueue-response.schema.json.cjs" }
+    },
+    "./http/fetch-request": {
+      "openjobspec-schema": "./schemas/v1/http/fetch-request.schema.json",
+      "import": { "types": "./dist/types/schema.d.ts", "default": "./dist/esm/schemas/v1/http/fetch-request.schema.json.js" },
+      "require": { "types": "./dist/types/schema.d.cts", "default": "./dist/cjs/schemas/v1/http/fetch-request.schema.json.cjs" }
+    },
+    "./http/fetch-response": {
+      "openjobspec-schema": "./schemas/v1/http/fetch-response.schema.json",
+      "import": { "types": "./dist/types/schema.d.ts", "default": "./dist/esm/schemas/v1/http/fetch-response.schema.json.js" },
+      "require": { "types": "./dist/types/schema.d.cts", "default": "./dist/cjs/schemas/v1/http/fetch-response.schema.json.cjs" }
+    },
+    "./http/ack-request": {
+      "openjobspec-schema": "./schemas/v1/http/ack-request.schema.json",
+      "import": { "types": "./dist/types/schema.d.ts", "default": "./dist/esm/schemas/v1/http/ack-request.schema.json.js" },
+      "require": { "types": "./dist/types/schema.d.cts", "default": "./dist/cjs/schemas/v1/http/ack-request.schema.json.cjs" }
+    },
+    "./http/nack-request": {
+      "openjobspec-schema": "./schemas/v1/http/nack-request.schema.json",
+      "import": { "types": "./dist/types/schema.d.ts", "default": "./dist/esm/schemas/v1/http/nack-request.schema.json.js" },
+      "require": { "types": "./dist/types/schema.d.cts", "default": "./dist/cjs/schemas/v1/http/nack-request.schema.json.cjs" }
+    },
+    "./http/heartbeat-request": {
+      "openjobspec-schema": "./schemas/v1/http/heartbeat-request.schema.json",
+      "import": { "types": "./dist/types/schema.d.ts", "default": "./dist/esm/schemas/v1/http/heartbeat-request.schema.json.js" },
+      "require": { "types": "./dist/types/schema.d.cts", "default": "./dist/cjs/schemas/v1/http/heartbeat-request.schema.json.cjs" }
+    },
+    "./http/heartbeat-response": {
+      "openjobspec-schema": "./schemas/v1/http/heartbeat-response.schema.json",
+      "import": { "types": "./dist/types/schema.d.ts", "default": "./dist/esm/schemas/v1/http/heartbeat-response.schema.json.js" },
+      "require": { "types": "./dist/types/schema.d.cts", "default": "./dist/cjs/schemas/v1/http/heartbeat-response.schema.json.cjs" }
+    },
+    "./extensions/ml-resources": {
+      "openjobspec-schema": "./extensions/ml-resources.json",
+      "import": { "types": "./dist/types/schema.d.ts", "default": "./dist/esm/extensions/ml-resources.json.js" },
+      "require": { "types": "./dist/types/schema.d.cts", "default": "./dist/cjs/extensions/ml-resources.json.cjs" }
+    },
+    "./schemas/*": {
+      "openjobspec-schema": "./schemas/*",
+      "import": { "types": "./dist/types/schema.d.ts", "default": "./dist/esm/schemas/*.js" },
+      "require": { "types": "./dist/types/schema.d.cts", "default": "./dist/cjs/schemas/*.cjs" }
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "job": ["./dist/types/schema.d.ts"],
+      "job-options": ["./dist/types/schema.d.ts"],
+      "retry-policy": ["./dist/types/schema.d.ts"],
+      "unique-policy": ["./dist/types/schema.d.ts"],
+      "error": ["./dist/types/schema.d.ts"],
+      "api-error": ["./dist/types/schema.d.ts"],
+      "event": ["./dist/types/schema.d.ts"],
+      "workflow": ["./dist/types/schema.d.ts"],
+      "cron": ["./dist/types/schema.d.ts"],
+      "queue-stats": ["./dist/types/schema.d.ts"],
+      "worker-info": ["./dist/types/schema.d.ts"],
+      "manifest": ["./dist/types/schema.d.ts"],
+      "http/enqueue-request": ["./dist/types/schema.d.ts"],
+      "http/enqueue-response": ["./dist/types/schema.d.ts"],
+      "http/batch-enqueue-request": ["./dist/types/schema.d.ts"],
+      "http/batch-enqueue-response": ["./dist/types/schema.d.ts"],
+      "http/fetch-request": ["./dist/types/schema.d.ts"],
+      "http/fetch-response": ["./dist/types/schema.d.ts"],
+      "http/ack-request": ["./dist/types/schema.d.ts"],
+      "http/nack-request": ["./dist/types/schema.d.ts"],
+      "http/heartbeat-request": ["./dist/types/schema.d.ts"],
+      "http/heartbeat-response": ["./dist/types/schema.d.ts"],
+      "extensions/ml-resources": ["./dist/types/schema.d.ts"],
+      "schemas/*": ["./dist/types/schema.d.ts"]
+    }
   },
   "files": [
+    "dist/",
     "schemas/",
     "extensions/",
     "tests/",
@@ -60,15 +189,23 @@
     "LICENSE"
   ],
   "scripts": {
+    "build": "node scripts/build-package.mjs",
     "test": "node --test tests/validate.test.js",
-    "validate": "node tests/validate.js"
+    "validate": "node tests/validate.js",
+    "check:package": "npm run build && node scripts/check-package.mjs",
+    "attw": "attw --pack",
+    "prepack": "npm run build"
   },
   "devDependencies": {
+    "@arethetypeswrong/cli": "0.18.5",
     "ajv": "^8.17.0",
-    "ajv-formats": "^3.0.0"
+    "ajv-formats": "^3.0.0",
+    "typescript": "^5.4.0"
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
-
