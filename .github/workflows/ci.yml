@@ -42,3 +42,6 @@ jobs:
       - name: Verify package type resolution
         if: matrix.node-version == 22
         run: npm run attw
+
+      - name: Audit dependencies
+        run: npm audit --audit-level=high
