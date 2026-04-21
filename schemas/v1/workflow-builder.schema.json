@@ -47,7 +47,7 @@
       }
     },
     "workflow": {
-      "$ref": "workflow.schema.json",
+      "$ref": "https://openjobspec.org/schemas/v1/workflow.json",
       "description": "The OJS workflow definition (chain, group, or batch)."
     },
     "canvas": {

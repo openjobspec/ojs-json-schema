@@ -61,7 +61,7 @@
   ],
   "scripts": {
     "test": "node --test tests/validate.test.js",
-    "validate": "ajv validate -s schemas/v1/job.schema.json -d 'tests/valid/*.json' --spec=draft2020"
+    "validate": "node tests/validate.js"
   },
   "devDependencies": {
     "ajv": "^8.17.0",

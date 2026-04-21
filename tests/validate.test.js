@@ -1,75 +1,172 @@
-import Ajv from 'ajv';
-import addFormats from 'ajv-formats';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import test from 'node:test';
+import {
+  buildSchemaRegistry,
+  discoverSchemas,
+  registerSchemas,
+  repositoryRoot,
+  runValidation,
+  validateFixtureDirectory,
+} from './schema-harness.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+test('schema discovery failures are fatal and identify the path', () => {
+  const missingDirectory = path.join(os.tmpdir(), 'ojs-missing-schema-directory');
+  assert.throws(
+    () => discoverSchemas([missingDirectory]),
+    /Unable to discover schemas in .*ojs-missing-schema-directory/,
+  );
+});
 
-const ajv = new Ajv({ strict: false, allErrors: true });
-addFormats(ajv);
+test('schema parse and registration failures are fatal', (t) => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'ojs-schema-errors-'));
+  t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
 
-// Load all schemas
-const schemaDir = path.join(__dirname, '..', 'schemas', 'v1');
-function loadSchemas(dir) {
-  for (const f of fs.readdirSync(dir)) {
-    const fp = path.join(dir, f);
-    if (fs.statSync(fp).isDirectory()) {
-      loadSchemas(fp);
-      continue;
+  const malformedPath = path.join(directory, 'malformed.schema.json');
+  fs.writeFileSync(malformedPath, '{');
+  assert.throws(
+    () => discoverSchemas([directory]),
+    /Unable to load schema .*malformed\.schema\.json/,
+  );
+
+  fs.rmSync(malformedPath);
+  const duplicateId = 'https://openjobspec.org/tests/duplicate.json';
+  const records = ['first.schema.json', 'second.schema.json'].map((fileName) => ({
+    filePath: path.join(directory, fileName),
+    schema: {
+      $schema: 'https://json-schema.org/draft/2020-12/schema',
+      $id: duplicateId,
+      type: 'object',
+    },
+  }));
+  assert.throws(
+    () => registerSchemas(records),
+    /Unable to register schema .*second\.schema\.json: schema with key or id .* already exists/,
+  );
+});
+
+test('fixture validation unit owns expectation, counting, and reporting', (t) => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'ojs-fixtures-'));
+  t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
+  fs.writeFileSync(path.join(directory, '02-rejected.json'), '{"valid":false}\n');
+  fs.writeFileSync(path.join(directory, '01-accepted.json'), '{"valid":true}\n');
+  fs.writeFileSync(path.join(directory, 'ignored.txt'), 'not a fixture\n');
+
+  const output = [];
+  const validate = (data) => data.valid;
+  const result = validateFixtureDirectory({
+    directory,
+    expectedValid: true,
+    validate,
+    log: (...parts) => output.push(parts),
+  });
+
+  assert.deepEqual(output, [
+    ['✓', '01-accepted.json'],
+    ['✗', '02-rejected.json', undefined],
+  ]);
+  assert.deepEqual(result, {
+    passed: 1,
+    failed: 1,
+    summary: 'Valid fixtures: 1 passed, 1 failed',
+  });
+});
+
+test('every public schema compiles using canonical IDs only', () => {
+  const { ajv, records, validators } = buildSchemaRegistry();
+  assert.equal(validators.size, records.length);
+
+  for (const { filePath, schema } of records) {
+    const fileNameAlias = new URL(path.basename(filePath), schema.$id).href;
+    if (fileNameAlias !== schema.$id) {
+      assert.equal(
+        ajv.getSchema(fileNameAlias),
+        undefined,
+        `${path.relative(repositoryRoot, filePath)} registered a synthetic filename alias`,
+      );
     }
-    if (!f.endsWith('.schema.json')) continue;
-    const s = JSON.parse(fs.readFileSync(fp, 'utf8'));
-    try {
-      // Strip $schema meta-reference that AJV doesn't resolve by default
-      const { $schema, ...schemaWithoutMeta } = s;
-      if (s.$id) {
-        schemaWithoutMeta.$id = s.$id;
-      }
-      ajv.addSchema(schemaWithoutMeta);
-    } catch (e) {
-      console.log('Schema load error:', f, e.message);
+
+    const validate = validators.get(filePath);
+    assert.equal(validate(null), false, `${path.relative(repositoryRoot, filePath)} accepted null`);
+
+    if (Array.isArray(schema.examples) && schema.examples.length > 0) {
+      assert.equal(
+        validate(schema.examples[0]),
+        true,
+        `${path.relative(repositoryRoot, filePath)} rejected its first example: ${JSON.stringify(validate.errors)}`,
+      );
     }
   }
-}
-loadSchemas(schemaDir);
+});
 
-const jobSchema = ajv.getSchema('https://openjobspec.org/schemas/v1/job.json');
+test('affected schemas validate through canonical external references', () => {
+  const { ajv } = buildSchemaRegistry();
+  const migrationExport = ajv.getSchema(
+    'https://openjobspec.org/schemas/v1/migration-export.json',
+  );
+  const workflowBuilder = ajv.getSchema(
+    'https://openjobspec.org/schemas/v1/workflow-builder.json',
+  );
 
-// Validate valid fixtures
-const validDir = path.join(__dirname, 'valid');
-let pass = 0, fail = 0;
-for (const f of fs.readdirSync(validDir).sort()) {
-  if (!f.endsWith('.json')) continue;
-  const data = JSON.parse(fs.readFileSync(path.join(validDir, f), 'utf8'));
-  const valid = jobSchema(data);
-  if (valid) {
-    pass++;
-    console.log('✓', f);
-  } else {
-    fail++;
-    console.log('✗', f, JSON.stringify(jobSchema.errors, null, 2));
-  }
-}
+  const migration = {
+    version: '1.0',
+    source: {
+      backend: 'redis',
+      url: 'redis://localhost:6379',
+    },
+    exported_at: '2026-08-04T00:00:00Z',
+    jobs: [
+      {
+        id: 'job-1',
+        type: 'email.send',
+        queue: 'default',
+        state: 'available',
+        args: [],
+        retry: {
+          max_attempts: 3,
+        },
+        unique: {
+          keys: ['type'],
+          on_conflict: 'reject',
+        },
+      },
+    ],
+  };
+  assert.equal(migrationExport(migration), true, JSON.stringify(migrationExport.errors));
 
-// Validate invalid fixtures
-const invalidDir = path.join(__dirname, 'invalid');
-let invalidPass = 0, invalidFail = 0;
-for (const f of fs.readdirSync(invalidDir).sort()) {
-  if (!f.endsWith('.json')) continue;
-  const data = JSON.parse(fs.readFileSync(path.join(invalidDir, f), 'utf8'));
-  const valid = jobSchema(data);
-  if (!valid) {
-    invalidPass++;
-    console.log('✓ (correctly rejected)', f);
-  } else {
-    invalidFail++;
-    console.log('✗ (should have been rejected)', f);
-  }
-}
+  const invalidRetry = structuredClone(migration);
+  invalidRetry.jobs[0].retry.max_attempts = -1;
+  assert.equal(migrationExport(invalidRetry), false);
 
-console.log();
-console.log(`Valid fixtures: ${pass} passed, ${fail} failed`);
-console.log(`Invalid fixtures: ${invalidPass} correctly rejected, ${invalidFail} incorrectly accepted`);
-process.exit(fail + invalidFail);
+  const invalidUnique = structuredClone(migration);
+  invalidUnique.jobs[0].unique.on_conflict = 'overwrite';
+  assert.equal(migrationExport(invalidUnique), false);
+
+  const builder = {
+    version: '1.0',
+    workflow: {
+      type: 'chain',
+      steps: [
+        {
+          type: 'email.send',
+          args: [],
+        },
+      ],
+    },
+    canvas: {
+      nodes: [],
+      edges: [],
+    },
+  };
+  assert.equal(workflowBuilder(builder), true, JSON.stringify(workflowBuilder.errors));
+
+  const invalidWorkflow = structuredClone(builder);
+  invalidWorkflow.workflow.type = 'sequence';
+  assert.equal(workflowBuilder(invalidWorkflow), false);
+});
+
+test('validates repository fixtures', () => {
+  assert.equal(runValidation(), 0);
+});
