@@ -50,6 +50,20 @@ npm install @openjobspec/schemas
 
 ## Usage
 
+Version 0.5 exports JavaScript wrappers, so Node.js consumers do not need JSON
+import attributes. The same schema objects are available through ESM and
+CommonJS:
+
+```javascript
+// ESM
+import jobSchema from "@openjobspec/schemas/job";
+```
+
+```javascript
+// CommonJS
+const jobSchema = require("@openjobspec/schemas/job");
+```
+
 ### Node.js with Ajv
 
 ```javascript
