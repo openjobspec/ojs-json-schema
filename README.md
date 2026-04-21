@@ -1,5 +1,5 @@
 # @openjobspec/schemas
-[![Stability: stable](https://img.shields.io/badge/stability-stable-brightgreen.svg)](https://github.com/openjobspec/openjobspec/blob/main/STABILITY.md)
+[![Stability: stable](https://img.shields.io/badge/stability-stable-brightgreen.svg)](https://openjobspec.org/governance/stability/)
 
 [![CI](https://github.com/openjobspec/ojs-json-schema/actions/workflows/ci.yml/badge.svg)](https://github.com/openjobspec/ojs-json-schema/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/@openjobspec/schemas.svg)](https://www.npmjs.com/package/@openjobspec/schemas)
@@ -134,8 +134,8 @@ validate(instance=job, schema=schema, cls=Draft202012Validator)
 
 The `tests/` directory contains test fixtures for validating schema implementations:
 
-- **`tests/valid/`** -- 13 valid job documents covering edge cases (minimal, full, scheduled, retryable, discarded, pending, cancelled, etc.)
-- **`tests/invalid/`** -- 16 invalid documents with `_reason` fields explaining why each MUST be rejected
+- **`tests/valid/`** -- 17 valid job documents covering edge cases (minimal, full, scheduled, retryable, discarded, pending, cancelled, etc.)
+- **`tests/invalid/`** -- 24 invalid documents with `_reason` fields explaining why each MUST be rejected
 
 These fixtures can be used by any OJS implementation to verify schema conformance.
 
@@ -155,4 +155,3 @@ These schemas conform to the [OJS Core Specification v1.0](https://openjobspec.o
 ## License
 
 [Apache 2.0](LICENSE)
-
