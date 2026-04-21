@@ -27,6 +27,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Verify release calculation
+        run: node scripts/check-release-please.mjs
+
       - name: Run schema validation tests
         run: npm test
 
