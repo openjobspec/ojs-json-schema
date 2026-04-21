@@ -1,0 +1,42 @@
+{
+  "$comment": "These are separate public contract families, not generated copies. Human owners must approve intentional schema changes and update the SHA-256 hash of UTF-8 bytes normalized to LF; tests prevent accidental overwrite or synchronization.",
+  "families": [
+    {
+      "name": "ml-resources",
+      "ownership": "Legacy extension, extension-path, and v1 contract owners remain distinct pending an explicit human compatibility decision.",
+      "contracts": [
+        {
+          "path": "extensions/ml-resources.json",
+          "$id": "https://openjobspec.org/schema/extensions/ml-resources.json",
+          "sha256_lf": "10e53ccaf913814eb9c8a8beb5f9de7f9f4ab797af54beac06b8636383d0d94f"
+        },
+        {
+          "path": "schemas/extensions/ml-resources.schema.json",
+          "$id": "https://openjobspec.org/schemas/extensions/ml-resources.json",
+          "sha256_lf": "c3be3e0cf0f945540a4fc892be0ed61dabadc6f93d9adb3fc86978c6b62b535b"
+        },
+        {
+          "path": "schemas/v1/ml-resources.schema.json",
+          "$id": "https://openjobspec.org/schemas/v1/ml-resources.json",
+          "sha256_lf": "137b61972c397f5a948b36f14db209ae1844c3254dda1a9d16dcebd3dcbbfe25"
+        }
+      ]
+    },
+    {
+      "name": "federation",
+      "ownership": "Compatibility and v1 federation contract owners remain distinct pending an explicit human compatibility decision.",
+      "contracts": [
+        {
+          "path": "schemas/federation.json",
+          "$id": "https://openjobspec.org/schemas/v1/federation.json",
+          "sha256_lf": "c4207919a79565e1e8a97a94f26f85ade7e7762e0eb25bdbaa66313668555a38"
+        },
+        {
+          "path": "schemas/v1/federation.schema.json",
+          "$id": "https://openjobspec.org/schemas/v1/federation.schema.json",
+          "sha256_lf": "4a347e4af3b0f8e3cd5b69f995eb90cbdc6e023663475d3ff236313d4403207f"
+        }
+      ]
+    }
+  ]
+}

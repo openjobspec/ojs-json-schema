@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -11,6 +12,11 @@ import {
   runValidation,
   validateFixtureDirectory,
 } from './schema-harness.js';
+
+function normalizedLfSha256(bytes) {
+  const normalized = bytes.toString('utf8').replace(/\r\n?/g, '\n');
+  return createHash('sha256').update(normalized, 'utf8').digest('hex');
+}
 
 test('schema discovery failures are fatal and identify the path', () => {
   const missingDirectory = path.join(os.tmpdir(), 'ojs-missing-schema-directory');
@@ -165,6 +171,41 @@ test('affected schemas validate through canonical external references', () => {
   const invalidWorkflow = structuredClone(builder);
   invalidWorkflow.workflow.type = 'sequence';
   assert.equal(workflowBuilder(invalidWorkflow), false);
+});
+
+test('normalized divergence hashes are identical for LF and CRLF', () => {
+  const lf = Buffer.from('{\n  "type": "object"\n}\n');
+  const crlf = Buffer.from(lf.toString('utf8').replaceAll('\n', '\r\n'));
+  assert.equal(normalizedLfSha256(lf), normalizedLfSha256(crlf));
+});
+
+test('diverged contract families retain distinct paths, ids, and normalized bytes', () => {
+  const manifestPath = path.join(repositoryRoot, 'tests', 'contract-divergence.json');
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+
+  for (const family of manifest.families) {
+    assert.match(family.ownership, /human compatibility decision/i);
+    const paths = new Set();
+    const ids = new Set();
+    const hashes = new Set();
+
+    for (const contract of family.contracts) {
+      const contractPath = path.join(repositoryRoot, contract.path);
+      const bytes = fs.readFileSync(contractPath);
+      const schema = JSON.parse(bytes);
+      const hash = normalizedLfSha256(bytes);
+
+      assert.equal(schema.$id, contract.$id, `${contract.path} changed $id`);
+      assert.equal(hash, contract.sha256_lf, `${contract.path} changed normalized bytes`);
+      paths.add(contract.path);
+      ids.add(contract.$id);
+      hashes.add(contract.sha256_lf);
+    }
+
+    assert.equal(paths.size, family.contracts.length, `${family.name} paths converged`);
+    assert.equal(ids.size, family.contracts.length, `${family.name} $ids converged`);
+    assert.equal(hashes.size, family.contracts.length, `${family.name} schemas synchronized`);
+  }
 });
 
 test('validates repository fixtures', () => {
