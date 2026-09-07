@@ -1,5 +1,13 @@
 # Contributing
 
+## Release automation
+
+Release Please reads `release-please-config.json` and
+`.release-please-manifest.json`. The manifest records the last published
+version; never pin the next release with a persistent `release-as`.
+`RELEASE_PLEASE_TOKEN` must be a GitHub App token or fine-grained PAT that can
+create release pull requests and releases and trigger downstream workflows.
+
 Thank you for your interest in contributing to Open Job Spec!
 
 ## Getting started

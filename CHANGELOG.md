@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-09-02
+
+### Changed
+
+- **Breaking:** package exports now resolve to generated JavaScript wrappers
+  instead of requiring consumers to load JSON modules directly.
+- Added equivalent packed-package ESM `import` and CommonJS `require` support
+  for every named schema export and the `./schemas/*` compatibility path.
+- Added separate `.d.ts`/`.d.cts` declaration routing, real Node16/NodeNext
+  CommonJS TypeScript fixtures, and `@arethetypeswrong/cli --pack` validation.
+
+## [0.4.1] - 2026-04-21
+
+### Changed
+
+- Package and changelog metadata synchronized with the `v0.4.1` repository tag.
+
 ## [0.4.0] - 2026-04-20
 
 ### Changed
@@ -22,4 +39,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Named exports in package.json for direct schema imports
 - AJV-based validation test suite
 - README with installation, usage, and schema reference
-

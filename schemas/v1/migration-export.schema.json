@@ -145,8 +145,8 @@
             }
           }
         },
-        "retry": { "$ref": "retry-policy.schema.json" },
-        "unique": { "$ref": "unique-policy.schema.json" },
+        "retry": { "$ref": "https://openjobspec.org/schemas/v1/retry-policy.json" },
+        "unique": { "$ref": "https://openjobspec.org/schemas/v1/unique-policy.json" },
         "workflow_id": { "type": "string" },
         "tags": {
           "type": "array",

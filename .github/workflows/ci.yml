@@ -27,5 +27,21 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Verify release calculation
+        run: node scripts/check-release-please.mjs
+
       - name: Run schema validation tests
         run: npm test
+
+      - name: Run fixture validation CLI
+        run: npm run validate
+
+      - name: Verify package dry run and consumer exports
+        run: npm run check:package
+
+      - name: Verify package type resolution
+        if: matrix.node-version == 22
+        run: npm run attw
+
+      - name: Audit dependencies
+        run: npm audit --audit-level=high
